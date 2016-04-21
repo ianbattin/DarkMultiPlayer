@@ -647,6 +647,13 @@ namespace DarkMultiPlayerServer
                     case ClientMessageType.CONNECTION_END:
                         Messages.ConnectionEnd.HandleConnectionEnd(client, message.data);
                         break;
+                    case ClientMessageType.SCIENCE_SYNC:
+                        Messages.ScienceSync.HandleScienceSync(client, message.data);
+                        break;
+                    case ClientMessageType.TEAM_JOIN_REQUEST:
+                        break;
+                    case ClientMessageType.TEAM_LEAVE_REQUEST:
+                        break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         Messages.ConnectionEnd.SendConnectionEnd(client, "Unhandled message type " + message.type);
@@ -870,6 +877,7 @@ namespace DarkMultiPlayerServer
         public bool authenticated;
         public byte[] challange;
         public string playerName = "Unknown";
+        public string teamName = "";
         public string clientVersion;
         public bool isBanned;
         public IPAddress ipAddress;

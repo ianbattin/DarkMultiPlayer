@@ -62,6 +62,10 @@ namespace DarkMultiPlayerServer
                     Directory.CreateDirectory(configDirectory);
                 }
 
+                // Initialize DBManager
+                DBManager.Reset();
+                DBManager.Load();
+
                 string oldSettingsFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DMPServerSettings.txt");
                 string newSettingsFile = Path.Combine(Server.configDirectory, "Settings.txt");
                 string oldGameplayFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DMPGameplaySettings.txt");
@@ -139,6 +143,8 @@ namespace DarkMultiPlayerServer
                         DarkLog.Debug("Reloading settings...");
                         Settings.Reset();
                         Settings.Load();
+                        DBManager.Reset();
+                        DBManager.Load();
                         if (Settings.settingsStore.gameDifficulty == GameDifficulty.CUSTOM)
                         {
                             DarkLog.Debug("Reloading gameplay settings...");

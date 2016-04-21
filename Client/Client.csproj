@@ -51,6 +51,10 @@
     <Compile Include="Main.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ConfigNodeSerializer.cs" />
+    <Compile Include="ResearchWorker.cs" />
+    <Compile Include="ScienceWorker.cs" />
+    <Compile Include="TeamWindow.cs" />
+    <Compile Include="TeamWorker.cs" />
     <Compile Include="Utilities\CompatibilityChecker.cs" />
     <Compile Include="VesselWorker.cs" />
     <Compile Include="TimeSyncer.cs" />

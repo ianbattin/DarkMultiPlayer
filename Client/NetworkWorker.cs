@@ -1089,10 +1089,12 @@ namespace DarkMultiPlayer
             using (MessageReader mr = new MessageReader(messageData))
             {
                 string playerName = mr.Read<string>();
+                string teamName = mr.Read<string>();
                 string vesselText = mr.Read<string>();
                 string statusText = mr.Read<string>();
                 PlayerStatus newStatus = new PlayerStatus();
                 newStatus.playerName = playerName;
+                newStatus.teamName = teamName;
                 newStatus.vesselText = vesselText;
                 newStatus.statusText = statusText;
                 PlayerStatusWorker.fetch.AddPlayerStatus(newStatus);
@@ -1639,6 +1641,7 @@ namespace DarkMultiPlayer
             using (MessageWriter mw = new MessageWriter())
             {
                 mw.Write<string>(playerStatus.playerName);
+                mw.Write<string>(playerStatus.teamName);
                 mw.Write<string>(playerStatus.vesselText);
                 mw.Write<string>(playerStatus.statusText);
                 messageBytes = mw.GetMessageBytes();
@@ -1972,6 +1975,38 @@ namespace DarkMultiPlayer
         {
             ClientMessage newMessage = new ClientMessage();
             newMessage.type = ClientMessageType.LOCK_SYSTEM;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendScienceSyncMessage(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.SCIENCE_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendTeamCreateRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_CREATE_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendTeamJoinRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_JOIN_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendTeamLeaveRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_LEAVE_REQUEST;
             newMessage.data = messageData;
             QueueOutgoingMessage(newMessage, true);
         }

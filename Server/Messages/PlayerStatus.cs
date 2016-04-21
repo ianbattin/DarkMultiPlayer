@@ -19,6 +19,7 @@ namespace DarkMultiPlayerServer.Messages
                         using (MessageWriter mw = new MessageWriter())
                         {
                             mw.Write<string>(otherClient.playerName);
+                            mw.Write<string>(otherClient.teamName);
                             mw.Write<string>(otherClient.playerStatus.vesselText);
                             mw.Write<string>(otherClient.playerStatus.statusText);
                             newMessage.data = mw.GetMessageBytes();
@@ -34,6 +35,7 @@ namespace DarkMultiPlayerServer.Messages
             using (MessageReader mr = new MessageReader(messageData))
             {
                 string playerName = mr.Read<string>();
+                string teamName = mr.Read<string>();
                 if (playerName != client.playerName)
                 {
                     DarkLog.Debug(client.playerName + " tried to send an update for " + playerName + ", kicking.");

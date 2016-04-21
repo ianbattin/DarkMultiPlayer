@@ -31,6 +31,7 @@ namespace DarkMultiPlayer
         private GUIStyle highlightStyle;
         private GUIStyle scrollStyle;
         private Dictionary<string, GUIStyle> playerNameStyle;
+        private GUIStyle teamNameStyle;
         private GUIStyle vesselNameStyle;
         private GUIStyle stateTextStyle;
         //Player status dictionaries
@@ -82,6 +83,14 @@ namespace DarkMultiPlayer
 
             //Adapted from KMP.
             playerNameStyle = new Dictionary<string, GUIStyle>();
+
+            teamNameStyle = new GUIStyle(GUI.skin.label);
+            teamNameStyle.normal.textColor = Color.white;
+            teamNameStyle.hover.textColor = teamNameStyle.normal.textColor;
+            teamNameStyle.active.textColor = teamNameStyle.normal.textColor;
+            teamNameStyle.fontStyle = FontStyle.Normal;
+            teamNameStyle.fontSize = 12;
+            teamNameStyle.stretchWidth = true;
 
             vesselNameStyle = new GUIStyle(GUI.skin.label);
             vesselNameStyle.normal.textColor = Color.white;
@@ -163,6 +172,7 @@ namespace DarkMultiPlayer
                 chatButtonStyle = highlightStyle;
             }
             ChatWorker.fetch.display = GUILayout.Toggle(ChatWorker.fetch.display, "Chat", chatButtonStyle);
+            TeamWindow.fetch.display = GUILayout.Toggle(TeamWindow.fetch.display, "Team", buttonStyle);
             CraftLibraryWorker.fetch.display = GUILayout.Toggle(CraftLibraryWorker.fetch.display, "Craft", buttonStyle);
             DebugWindow.fetch.display = GUILayout.Toggle(DebugWindow.fetch.display, "Debug", buttonStyle);
             GUIStyle screenshotButtonStyle = buttonStyle;
@@ -594,6 +604,7 @@ namespace DarkMultiPlayer
                 chatButtonStyle = highlightStyle;
             }
             ChatWorker.fetch.display = GUILayout.Toggle(ChatWorker.fetch.display, "C", chatButtonStyle);
+            TeamWindow.fetch.display = GUILayout.Toggle(TeamWindow.fetch.display, "T", chatButtonStyle);
             DebugWindow.fetch.display = GUILayout.Toggle(DebugWindow.fetch.display, "D", buttonStyle);
             GUIStyle screenshotButtonStyle = buttonStyle;
             if (ScreenshotWorker.fetch.screenshotButtonHighlighted)
@@ -636,6 +647,10 @@ namespace DarkMultiPlayer
             GUILayout.FlexibleSpace();
             GUILayout.Label(playerStatus.statusText, stateTextStyle);
             GUILayout.EndHorizontal();
+            if(playerStatus.teamName != "")
+            {
+                GUILayout.Label("Team: " + playerStatus.teamName, teamNameStyle);
+            }
             if (playerStatus.vesselText != "")
             {
                 GUILayout.Label("Pilot: " + playerStatus.vesselText, vesselNameStyle);

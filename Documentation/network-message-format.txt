@@ -14,6 +14,7 @@ string - message.
 
 PLAYER_STATUS:
 string - player name
+string - team name
 string - vessel name
 string - status text
 
@@ -90,6 +91,9 @@ int - full message length, byte[] - First chunk.
 --Continuing split message--
 byte[] - Next chunk.
 
+SCIENCE_SYNC:
+float - new science value for the team
+
 ===Client only===
 HANDSHAKE_REQUEST:
 int - Protocol version
@@ -119,6 +123,20 @@ string - active vessel GUID.
 SYNC_TIME_REQUEST: long - Client send time (1/4 parts of a valid NTP message)
 
 PING_REQUEST: long - Client send time
+
+TEAM_CREATE_REQUEST:
+string - teamName
+string - password
+double - funds
+float - reputation
+float - science
+
+TEAM_JOIN_REQUEST:
+string - teamName
+string - password
+
+TEAM_LEAVE_REQUEST:
+string - teamName(is it even needed?)
 
 ===Server only===
 HANDSHAKE_REPLY: int - Handshake status
@@ -159,5 +177,22 @@ long - server send time (3/4 parts of a valid NTP message).
 PING_REPLY:
 long - client send time
 long server send time.
+
+TEAM_STATUS: This message is sent by the server when team properties change
+int - messageType(JOIN,LEAVE,STATUS)
+string - teamName
+--JOIN,LEAVE
+string - playerName
+--STATUS
+int - memberCount
+string[memberCount] - playerName
+
+TEAM_JOIN_RESPONSE:
+bool - success
+string - error
+
+TEAM_LEAVE_RESPONSE:
+bool - success
+string - error
 
 TODO: Actually write documentation on how my message writer works. The code is here anyway, this is how I built the MessageWriter.dll file: https://github.com/godarklight/BinarySerialiser

@@ -17,7 +17,7 @@ namespace DarkMultiPlayerCommon
         //Split messages into 8kb chunks to higher priority messages have more injection points into the TCP stream.
         public const int SPLIT_MESSAGE_LENGTH = 8192;
         //Bump this every time there is a network change (Basically, if MessageWriter or MessageReader is touched).
-        public const int PROTOCOL_VERSION = 39;
+        public const int PROTOCOL_VERSION = 40;
         //Program version. This is written in the build scripts.
         public const string PROGRAM_VERSION = "Custom";
         //Mod control version - The last version to add parts
@@ -527,7 +527,11 @@ namespace DarkMultiPlayerCommon
         LOCK_SYSTEM,
         MOD_DATA,
         SPLIT_MESSAGE,
-        CONNECTION_END
+        CONNECTION_END,
+        SCIENCE_SYNC,
+        TEAM_CREATE_REQUEST,
+        TEAM_JOIN_REQUEST,
+        TEAM_LEAVE_REQUEST
     }
 
     public enum ServerMessageType
@@ -561,7 +565,11 @@ namespace DarkMultiPlayerCommon
         LOCK_SYSTEM,
         MOD_DATA,
         SPLIT_MESSAGE,
-        CONNECTION_END
+        CONNECTION_END,
+        SCIENCE_SYNC,
+        TEAM_STATUS,
+        TEAM_JOIN_RESPONSE,
+        TEAM_LEAVE_RESPONSE
     }
 
     public enum ConnectionStatus
@@ -633,6 +641,13 @@ namespace DarkMultiPlayerCommon
         CHANGE_SUBSPACE,
         RELOCK_SUBSPACE,
         REPORT_RATE
+    }
+
+    public enum TeamMessageType
+    {
+        TEAM_JOIN,
+        TEAM_LEAVE,
+        TEAM_STATUS
     }
 
     public enum CraftMessageType
@@ -707,8 +722,32 @@ namespace DarkMultiPlayerCommon
     public class PlayerStatus
     {
         public string playerName;
+        public string teamName;
         public string vesselText;
         public string statusText;
+    }
+
+    public class MemberStatus
+    {
+        public string memberName;
+        public bool online;
+    }
+    public class TeamStatus
+    {
+        public string teamName;
+        public List<MemberStatus> teamMembers;
+    }
+
+    public class RDNodeStatus
+    {
+        public string techID;
+        public bool researched;
+
+        public RDNodeStatus(string techID, bool researched)
+        {
+            this.techID = techID;
+            this.researched = researched;
+        }
     }
 
     public class Subspace
