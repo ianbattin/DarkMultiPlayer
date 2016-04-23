@@ -535,10 +535,10 @@ namespace DarkMultiPlayer
                                     Disconnect("Disconnected from pre-v0.2 DMP server");
                                     return;
                                 }
-                                if (messageType > (Enum.GetNames(typeof(ServerMessageType)).Length - 1))
+                                if (messageType > (Enum.GetNames(typeof(ServerMessageType)).Length))
                                 {
                                     //Malformed message, most likely from a non DMP-server.
-                                    Disconnect("Disconnected from non-DMP server, type received was: "+messageType.ToString());
+                                    Disconnect("Disconnected from non-DMP server");
                                     //Returning from ReceiveCallback will break the receive loop and stop processing any further messages.
                                     return;
                                 }

@@ -160,6 +160,7 @@ namespace DarkMultiPlayer
                 DarkLog.Debug("Successfully joined team!");
                 // Joined Team!
                 string teamName = mr.Read<string>();
+                DarkLog.Debug("teamName is: " + teamName);
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
 
                 // Receive funds/reputation/science/research status
@@ -176,6 +177,7 @@ namespace DarkMultiPlayer
                 else if (HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
                 {
                     float science = mr.Read<float>();
+                    DarkLog.Debug("trying to sync science");
                     ScienceWorker.fetch.syncScienceWithTeam(science);
                 }
 
