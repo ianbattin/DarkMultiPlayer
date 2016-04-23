@@ -156,6 +156,7 @@ namespace DarkMultiPlayerServer.Messages
             }
 
             client.playerName = playerName;
+            client.teamName = DBManager.getTeamNameByPlayerName(client.playerName);
             client.publicKey = playerPublicKey;
             client.clientVersion = clientVersion;
 

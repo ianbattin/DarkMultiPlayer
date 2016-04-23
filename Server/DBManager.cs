@@ -131,6 +131,8 @@ namespace DarkMultiPlayerServer
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
             command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
             SQLiteDataReader reader = command.ExecuteReader();
+            if (!reader.Read())
+                return null;
             TeamStatus team = new TeamStatus();
             team.teamName = reader.GetString(0);
             team.funds = reader.GetDouble(1);
@@ -146,7 +148,7 @@ namespace DarkMultiPlayerServer
         /// <returns></returns>
         public static int getTeamIdByPlayerName(string name)
         {
-            string sql = "SELECT id FROM team AS C JOIN team_members AS R ON C.id=R.id WHERE R.name = @name";
+            string sql = "SELECT team.id FROM team INNER JOIN team_members on team.id = team_members.id WHERE team_members.name = @name";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
             command.Parameters.Add(new SQLiteParameter("@name", name));
             SQLiteDataReader reader = command.ExecuteReader();
@@ -158,6 +160,24 @@ namespace DarkMultiPlayerServer
             {
                 // player is not in a team
                 return -1;
+            }
+        }
+
+        public static string getTeamNameByPlayerName(string name)
+        {
+            string sql = "SELECT team.name FROM team INNER JOIN team_members on team.id = team_members.id WHERE team_members.name = @name";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            command.Parameters.Add(new SQLiteParameter("@name", name));
+            SQLiteDataReader reader = command.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                return reader.GetString(0);
+            }
+            else
+            {
+                // player is not in a team
+                return "";
             }
         }
 

@@ -9,6 +9,45 @@ namespace DarkMultiPlayerServer.Messages
 {
     public class TeamControl
     {
+
+        public static void SendOwnTeamData(ClientObject client)
+        {
+            int teamid = DBManager.getTeamIdByPlayerName(client.playerName);
+            if (teamid >= 0) { 
+                // player is in a team this is to initialize after connection
+
+                // first we set the teamName for future reference
+                ServerMessage message = new ServerMessage();
+                message.type = ServerMessageType.TEAM_JOIN_RESPONSE;
+                using (MessageWriter mw = new MessageWriter())
+                {
+                    mw.Write<bool>(true);
+                    mw.Write<string>(client.teamName);
+
+                    TeamStatus team = DBManager.getTeamStatusWithoutMembers(client.teamName);
+                    if (team == null)
+                        return;
+                    switch (Settings.settingsStore.gameMode)
+                    {
+                        case GameMode.CAREER:
+                            {
+                                mw.Write<double>(team.funds);
+                                mw.Write<float>(team.reputation);
+                                mw.Write<float>(team.science);
+                            }
+                            break;
+                        case GameMode.SCIENCE:
+                            {
+                                mw.Write<float>(team.science);
+                            }
+                            break;
+                    }
+                    message.data = mw.GetMessageBytes();
+                }
+                ClientHandler.SendToClient(client, message, true);
+            }
+        }
+
         public static void handleTeamCreateRequest(ClientObject client, byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
