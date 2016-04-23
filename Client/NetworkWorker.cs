@@ -851,6 +851,18 @@ namespace DarkMultiPlayer
                     case ServerMessageType.CONNECTION_END:
                         HandleConnectionEnd(message.data);
                         break;
+                    case ServerMessageType.TEAM_CREATE_RESPONSE:
+                        TeamWorker.fetch.HandleTeamCreateResponse(message.data);
+                        break;
+                    case ServerMessageType.TEAM_JOIN_RESPONSE:
+                        TeamWorker.fetch.HandleTeamJoinResponse(message.data);
+                        break;
+                    case ServerMessageType.TEAM_LEAVE_RESPONSE:
+                        TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
+                        break;
+                    case ServerMessageType.TEAM_STATUS:
+                        TeamWorker.fetch.HandleTeamMessage(message.data);
+                        break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         break;

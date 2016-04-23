@@ -41,6 +41,16 @@ namespace DarkMultiPlayer
             ProcessTeamMessages();
         }
 
+        public TeamStatus getTeamStatusByTeamName(string teamName)
+        {
+            foreach(TeamStatus team in teams)
+            {
+                if (team.teamName.Equals(teamName))
+                    return team;
+            }
+            return null;
+        }
+
         public void sendTeamCreateRequest(string teamName, string password)
         {
             if (teamName.Length < 3)
@@ -50,25 +60,38 @@ namespace DarkMultiPlayer
             }
             using (MessageWriter mw = new MessageWriter())
             {
+                DarkLog.Debug("serializing teamcreaterqeuest: ");
                 mw.Write<string>(teamName);
                 mw.Write<string>(password);
-                mw.Write<double>(Funding.Instance.Funds);
-                mw.Write<float>(Reputation.Instance.reputation);
-                mw.Write<float>(ResearchAndDevelopment.Instance.Science);
+                if(HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                {
+                    mw.Write<double>(Funding.Instance.Funds);
+                    mw.Write<float>(Reputation.Instance.reputation);
+                    mw.Write<float>(ResearchAndDevelopment.Instance.Science);
+                } else if(HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
+                    mw.Write<float>(ResearchAndDevelopment.Instance.Science);
+                }
 
-                List<RDNodeStatus> nodesToSync = new List<RDNodeStatus>();
-                ResearchAndDevelopment.Instance.GetTechState("");
-                foreach(RDNode node in RDController.Instance.nodes)
+                // todo later find a way/optional to sync research for now sync only rep/science/funds(maybe not even funds)
+                //List<RDNodeStatus> nodesToSync = new List<RDNodeStatus>();
+                /*foreach(RDNode node in RDController.Instance.nodes)
                 {
                     if ((node.state & RDNode.State.RESEARCHED) != 0)
                     {
+                        DarkLog.Debug("sendTeamCreateRequest: techID: " + node.tech.techID + " is researched");
                         nodesToSync.Add(new RDNodeStatus(node.tech.techID, true));
                     } else
                     {
+                        DarkLog.Debug("sendTeamCreateRequest: techID: " + node.tech.techID + " is NOT researched");
                         nodesToSync.Add(new RDNodeStatus(node.tech.techID, false));
                     }
                 }
-                // Todo serialize nodes! probably just techID
+                mw.Write<int>(nodesToSync.Count);
+                foreach(RDNodeStatus nS in nodesToSync)
+                {
+                    mw.Write<string>(nS.techID);
+                    mw.Write<bool>(nS.researched);
+                }*/
 
                 NetworkWorker.fetch.SendTeamCreateRequest(mw.GetMessageBytes());
             }
@@ -89,11 +112,10 @@ namespace DarkMultiPlayer
             }
         }
 
-        public void sendTeamLeaveRequest(string teamName)
+        public void sendTeamLeaveRequest()
         {
             using (MessageWriter mw = new MessageWriter())
             {
-                mw.Write<string>(teamName);
                 NetworkWorker.fetch.SendTeamLeaveRequest(mw.GetMessageBytes());
             }
         }
@@ -106,7 +128,7 @@ namespace DarkMultiPlayer
             }
         }
 
-        private void HandleTeamCreateResponse(byte[] messageData)
+        public void HandleTeamCreateResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
             {
@@ -118,10 +140,13 @@ namespace DarkMultiPlayer
                     return;
                 }
                 DarkLog.Debug("Successfully created team!");
+                // Created Team!
+                string teamName = mr.Read<string>();
+                PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
             }
         }
 
-        private void HandleTeamJoinResponse(byte[] messageData)
+        public void HandleTeamJoinResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
             {
@@ -133,10 +158,41 @@ namespace DarkMultiPlayer
                     return;
                 }
                 DarkLog.Debug("Successfully joined team!");
+                // Joined Team!
+                string teamName = mr.Read<string>();
+                PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
+
+                // Receive funds/reputation/science/research status
+
+                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                {
+                    double funds = mr.Read<double>();
+                    ResearchWorker.fetch.syncFundsWithTeam(funds);
+                    float reputation = mr.Read<float>();
+                    ResearchWorker.fetch.syncReputationWithTeam(reputation);
+                    float science = mr.Read<float>();
+                    ScienceWorker.fetch.syncScienceWithTeam(science);
+                }
+                else if (HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
+                {
+                    float science = mr.Read<float>();
+                    ScienceWorker.fetch.syncScienceWithTeam(science);
+                }
+
+                /*List<RDNodeStatus> RDStatus = new List<RDNodeStatus>();
+                int numRD = mr.Read<int>();
+                for(int i = 0; i<numRD; i++)
+                {
+                    string techID = mr.Read<string>();
+                    bool researched = mr.Read<bool>();
+                    RDStatus.Add(new RDNodeStatus(techID, researched));
+
+                    // ResearchWorker set nodes accordingly
+                }*/
             }
         }
 
-        private void HandleTeamLeaveResponse(byte[] messageData)
+        public void HandleTeamLeaveResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
             {
@@ -151,7 +207,7 @@ namespace DarkMultiPlayer
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = "";
             }
         }
-        private void HandleTeamMessage(byte[] messageData)
+        public void HandleTeamMessage(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
             {
@@ -173,34 +229,95 @@ namespace DarkMultiPlayer
                         break;
                     case TeamMessageType.TEAM_STATUS:
                         {
+                            TeamStatus team = new TeamStatus();
+                            team.funds = mr.Read<double>();
+                            team.reputation = mr.Read<float>();
+                            team.science = mr.Read<float>();
                             int memberCount = mr.Read<int>();
-                            if (memberCount < 1)
-                                return;
-                            List<string> memberNames = new List<string>();
-                            for(int i = 0; i < memberCount; i++)
+                            List<MemberStatus> members = new List<MemberStatus>();
+                            for (int j = 0; j < memberCount; j++)
                             {
-                                memberNames.Add(mr.Read<string>());
+                                string memberName = mr.Read<string>();
+                                bool online = mr.Read<bool>();
+                                members.Add(new MemberStatus(memberName, online));
                             }
-                            HandleTeamStatus(teamName, memberNames);
+                            team.teamMembers = members;
+                            HandleTeamStatus(teamName, team);
+                        }
+                        break;
+                    case TeamMessageType.TEAM_LIST:
+                        {
+                            int teamCount = mr.Read<int>();
+                            List<TeamStatus> allTeams = new List<TeamStatus>();
+                            for (int i = 0; i < teamCount; i++)
+                            {
+                                TeamStatus team = new TeamStatus();
+                                team.funds = mr.Read<double>();
+                                team.reputation = mr.Read<float>();
+                                team.science = mr.Read<float>();
+
+                                int memberCount = mr.Read<int>();
+                                List<MemberStatus> members = new List<MemberStatus>();
+                                for (int j = 0; j < memberCount; j++)
+                                {
+                                    string memberName = mr.Read<string>();
+                                    bool online = mr.Read<bool>();
+                                    members.Add(new MemberStatus(memberName, online));
+                                }
+                                team.teamMembers = members;
+                                allTeams.Add(team);
+                            }
+
+                            HandleTeamList(allTeams);
                         }
                         break;
                 }
             }
         }
 
+
+
         private void HandlePlayerJoin(string teamName, string playerName)
         {
-
+            TeamStatus team = getTeamByTeamName(teamName);
+            team.teamMembers.Add(new MemberStatus(playerName));
+            // do something else? who caaares right now, check gui updates etc
         }
 
         private void HandlePlayerLeave(string teamName, string playerName)
         {
-
+            TeamStatus team = getTeamByTeamName(teamName);
+            team.removeMember(playerName);
+            // ?!?
         }
 
-        private void HandleTeamStatus(string teamName, List<string> memberNames)
+        private void HandleTeamStatus(string teamName, TeamStatus team)
         {
+            // placerholder until we sync all details of the team!
+            int idx = teams.FindIndex(t => t.teamName == teamName);
+            teams[idx] = team;
+        }
 
+        private void HandleTeamList(List<TeamStatus> allTeams)
+        {
+            this.teams = allTeams;
+        }
+
+        // TeamStatus helper functions, could be done with lambda functions ;)
+
+        private TeamStatus getTeamByTeamName(string teamName)
+        {
+            return teams.Find(team => team.teamName == teamName);
+        }
+
+        private TeamStatus getTeamByMemberName(string playerName)
+        {
+            foreach(TeamStatus team in teams)
+            {
+                if (team.teamMembers.Any(member => member.memberName == playerName))
+                    return team;
+            }
+            return null;
         }
     }
 }

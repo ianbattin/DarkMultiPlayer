@@ -650,9 +650,14 @@ namespace DarkMultiPlayerServer
                     case ClientMessageType.SCIENCE_SYNC:
                         Messages.ScienceSync.HandleScienceSync(client, message.data);
                         break;
+                    case ClientMessageType.TEAM_CREATE_REQUEST:
+                        Messages.TeamControl.handleTeamCreateRequest(client, message.data);
+                        break;
                     case ClientMessageType.TEAM_JOIN_REQUEST:
+                        Messages.TeamControl.handleTeamJoinRequest(client, message.data);
                         break;
                     case ClientMessageType.TEAM_LEAVE_REQUEST:
+                        Messages.TeamControl.handleTeamLeaveRequest(client, message.data);
                         break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);

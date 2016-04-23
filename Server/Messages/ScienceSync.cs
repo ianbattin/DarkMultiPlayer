@@ -12,6 +12,8 @@ namespace DarkMultiPlayerServer.Messages
             if (client.authenticated)
             {
                 string name = client.playerName;
+                if (client.teamName == "")
+                    return;
                 int teamid = DBManager.getTeamIdByPlayerName(name);
             }
         }

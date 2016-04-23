@@ -74,6 +74,7 @@
     <Compile Include="CommandHandler.cs" />
     <Compile Include="ClientHandler.cs" />
     <Compile Include="Messages\ScienceSync.cs" />
+    <Compile Include="Messages\TeamControl.cs" />
     <Compile Include="ScreenshotExpire.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Log.cs" />

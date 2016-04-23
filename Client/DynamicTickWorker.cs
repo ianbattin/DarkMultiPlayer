@@ -11,8 +11,8 @@ namespace DarkMultiPlayer
         private float lastDynamicTickRateCheck;
         private const float DYNAMIC_TICK_RATE_CHECK_INTERVAL = 1f;
         //Twiddle these knobs
-        private const int MASTER_MIN_TICKS_PER_SECOND = 1;
-        private const int MASTER_MAX_TICKS_PER_SECOND = 5;
+        private const int MASTER_MIN_TICKS_PER_SECOND = 5;
+        private const int MASTER_MAX_TICKS_PER_SECOND = 20;
         private const int MASTER_MIN_SECONDARY_VESSELS = 1;
         private const int MASTER_MAX_SECONDARY_VESSELS = 15;
         //500KB

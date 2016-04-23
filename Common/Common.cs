@@ -568,6 +568,8 @@ namespace DarkMultiPlayerCommon
         CONNECTION_END,
         SCIENCE_SYNC,
         TEAM_STATUS,
+        TEAM_LIST,
+        TEAM_CREATE_RESPONSE,
         TEAM_JOIN_RESPONSE,
         TEAM_LEAVE_RESPONSE
     }
@@ -647,7 +649,8 @@ namespace DarkMultiPlayerCommon
     {
         TEAM_JOIN,
         TEAM_LEAVE,
-        TEAM_STATUS
+        TEAM_STATUS,
+        TEAM_LIST
     }
 
     public enum CraftMessageType
@@ -731,11 +734,31 @@ namespace DarkMultiPlayerCommon
     {
         public string memberName;
         public bool online;
+
+        public MemberStatus(string playerName)
+        {
+            memberName = playerName;
+            online = true;
+        }
+
+        public MemberStatus(string playerName, bool online)
+        {
+            this.memberName = playerName;
+            this.online = online;
+        }
     }
     public class TeamStatus
     {
         public string teamName;
-        public List<MemberStatus> teamMembers;
+        public List<MemberStatus> teamMembers = new List<MemberStatus>();
+        public double funds;
+        public float reputation;
+        public float science;
+
+        public void removeMember(string playerName)
+        {
+            teamMembers.RemoveAll(member => member.memberName == playerName);
+        }
     }
 
     public class RDNodeStatus

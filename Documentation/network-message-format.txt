@@ -130,13 +130,17 @@ string - password
 double - funds
 float - reputation
 float - science
+int - ResearchNodes count
+--- ResearchNodes count
+string - techID
+bool - researched
+---
 
 TEAM_JOIN_REQUEST:
 string - teamName
 string - password
 
 TEAM_LEAVE_REQUEST:
-string - teamName(is it even needed?)
 
 ===Server only===
 HANDSHAKE_REPLY: int - Handshake status
@@ -178,21 +182,38 @@ PING_REPLY:
 long - client send time
 long server send time.
 
-TEAM_STATUS: This message is sent by the server when team properties change
+TEAM_STATUS: This message is sent by the server when team properties change(people join or leave a team)
 int - messageType(JOIN,LEAVE,STATUS)
 string - teamName
 --JOIN,LEAVE
 string - playerName
---STATUS
+--STATUS: sent when someone connects to the server to initialize the current team affiliations
 int - memberCount
 string[memberCount] - playerName
 
+TEAM_CREATE_RESPONSE:
+bool - success
+if !success: string - error
+string - teamName
+
+
 TEAM_JOIN_RESPONSE:
 bool - success
-string - error
+if !success: string - error
+string - teamName
+double - funds
+float - reputation
+float - science
+int - ResearchNodes count
+--- ResearchNodes count
+string - techID
+bool - researched
+---
+
+
 
 TEAM_LEAVE_RESPONSE:
 bool - success
-string - error
+if !success: string - error
 
 TODO: Actually write documentation on how my message writer works. The code is here anyway, this is how I built the MessageWriter.dll file: https://github.com/godarklight/BinarySerialiser

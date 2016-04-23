@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Data.SQLite;
 using System.IO;
+using DarkMultiPlayerCommon;
 
 namespace DarkMultiPlayerServer
 {
@@ -56,7 +57,6 @@ namespace DarkMultiPlayerServer
             sql += "CREATE TABLE team_research(id integer, rdtechname text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE); ";
             sql += "COMMIT;";
             executeQry(sql);
-            createNewTeam("testteam", "test", 400000d, 3f, 1337f, "bawki", "bawkKey");
         }
 
         public static int createNewTeam(string name, string password, double funds, float reputation, float science, string creator, string creator_pubKey)
@@ -84,6 +84,59 @@ namespace DarkMultiPlayerServer
             command.ExecuteNonQuery();
 
             return 0;
+        }
+
+        public static bool addPlayerToTeam(string teamName, string password, string playerName, string pubKey)
+        {
+            string sql = "SELECT id, password FROM team WHERE name = @teamName";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+            SQLiteDataReader reader = command.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                int id = reader.GetInt32(0);
+                string pw = reader.GetString(1);
+                if (password != pw)
+                    return false;
+                else
+                {
+                    // add user!
+                    sql = "INSERT INTO team_members(id, name, pubkey) VALUES (@id,@name,@pubkey);";
+                    command = new SQLiteCommand(sql, m_dbConnection);
+                    command.Parameters.Clear();
+                    command.Parameters.Add(new SQLiteParameter("@id", id));
+                    command.Parameters.Add(new SQLiteParameter("@name", playerName));
+                    command.Parameters.Add(new SQLiteParameter("@pubkey", pubKey));
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            else
+                return false;
+        }
+
+        public static void removePlayerFromTeam(string teamName, string playerName)
+        {
+            string sql = "DELETE FROM team_members WHERE team_members.id in (SELECT team.id FROM team WHERE team.name = @teamName) AND team_members.name = @playerName";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+            command.Parameters.Add(new SQLiteParameter("@playerName", playerName));
+            command.ExecuteNonQuery();
+        }
+
+        public static TeamStatus getTeamStatusWithoutMembers(string teamName)
+        {
+            string sql = "SELECT name,funds,reputation,science FROM team WHERE name = @teamName";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+            SQLiteDataReader reader = command.ExecuteReader();
+            TeamStatus team = new TeamStatus();
+            team.teamName = reader.GetString(0);
+            team.funds = reader.GetDouble(1);
+            team.reputation = reader.GetFloat(2);
+            team.science = reader.GetFloat(3);
+            return team;
         }
 
         /// <summary>

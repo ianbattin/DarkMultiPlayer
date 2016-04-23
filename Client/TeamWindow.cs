@@ -77,24 +77,29 @@ namespace DarkMultiPlayer
         {
             GUILayout.BeginVertical();
             GUI.DragWindow(moveRect);
-            GUILayout.Label("TeamName:", labelStyle);
-            newTeamName = GUILayout.TextField(newTeamName, 32);
-            GUILayout.Label("Password:", labelStyle);
-            password = GUILayout.TextField(password, 32);
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
             {
-                
+                GUILayout.Label("TeamName:", labelStyle);
+                newTeamName = GUILayout.TextField(newTeamName, 32);
+                GUILayout.Label("Password:", labelStyle);
+                password = GUILayout.TextField(password, 32);
                 if (GUILayout.Button("Join Team", buttonStyle))
                 {
                     // pressed join team?
                     DarkLog.Debug("Trying to join team: "+newTeamName);
                     TeamWorker.fetch.sendTeamJoinRequest(newTeamName, password);
                 }
+                if(GUILayout.Button("Create Team", buttonStyle))
+                {
+                    DarkLog.Debug("Trying to create team: " + newTeamName+ "with password: "+password);
+                    TeamWorker.fetch.sendTeamCreateRequest(newTeamName, password);
+                }
             } else
             {
                 if (GUILayout.Button("Leave Team", buttonStyle))
                 {
                     DarkLog.Debug("Leave Team pressed");
+                    TeamWorker.fetch.sendTeamLeaveRequest();
                 }
             }
             GUILayout.EndVertical();
