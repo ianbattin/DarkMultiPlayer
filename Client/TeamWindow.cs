@@ -9,6 +9,7 @@ namespace DarkMultiPlayer
     public class TeamWindow
     {
         public bool display = false;
+        public bool inTeam = false;
         private bool safeDisplay = false;
         private bool initialized = false;
         private static TeamWindow singleton;

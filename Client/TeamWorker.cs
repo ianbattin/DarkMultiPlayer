@@ -11,7 +11,7 @@ namespace DarkMultiPlayer
     public class TeamWorker
     {
         public bool workerEnabled = false;
-        private static TeamWorker singleton;
+        private static TeamWorker singleton = new TeamWorker();
         private Queue<byte[]> newTeamMessages = new Queue<byte[]>();
         public List<TeamStatus> teams;
 
@@ -167,6 +167,7 @@ namespace DarkMultiPlayer
 
                 if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
                 {
+                    //DarkLog.Debug("HandleTeamJoinResponse: ");
                     double funds = mr.Read<double>();
                     ResearchWorker.fetch.syncFundsWithTeam(funds);
                     float reputation = mr.Read<float>();

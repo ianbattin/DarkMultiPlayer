@@ -111,6 +111,7 @@ namespace DarkMultiPlayer
                 resetEvent.Add(WarpWorker.Reset);
                 resetEvent.Add(TeamWorker.Reset);
                 resetEvent.Add(ScienceWorker.Reset);
+                resetEvent.Add(ResearchWorker.Reset);
                 GameEvents.onHideUI.Add(() =>
                 {
                     showGUI = false;

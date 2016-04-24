@@ -81,13 +81,29 @@ namespace DarkMultiPlayerServer.Messages
                 }
 
                 int teamid = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
-                if (teamid >= 0)
-                    DarkLog.Debug("Successfully created team: " + teamName);
-                else
-                    DarkLog.Debug("Team creation failed with errorcode: " + teamid);
+
 
                 // now send new info  and responses!
+                ServerMessage message = new ServerMessage();
+                message.type = ServerMessageType.TEAM_CREATE_RESPONSE;
 
+                using (MessageWriter mw = new MessageWriter())
+                {
+                    if (teamid >= 0)
+                    {
+                        DarkLog.Debug("Successfully created team: " + teamName);
+                        mw.Write<bool>(true);
+                        mw.Write<string>(teamName);
+                    }
+                    else
+                    {
+                        DarkLog.Debug("Team creation failed with errorcode: " + teamid);
+                        mw.Write<bool>(false);
+                        mw.Write<string>("Could not create team, errorCode: " + teamid);
+                    }
+                    message.data = mw.GetMessageBytes();
+                }
+                ClientHandler.SendToClient(client, message, true);
             }
         }
 
@@ -99,29 +115,35 @@ namespace DarkMultiPlayerServer.Messages
                 string password = mr.Read<string>();
                 if (DBManager.addPlayerToTeam(teamName, password, client.playerName, client.publicKey))
                 {
+                    client.teamName = teamName;
                     // success
                     ServerMessage message = new ServerMessage();
                     message.type = ServerMessageType.TEAM_JOIN_RESPONSE;
                     using (MessageWriter mw = new MessageWriter())
                     {
-                        mw.Write<bool>(true);
-                        mw.Write<string>(client.teamName);
-
                         TeamStatus team = DBManager.getTeamStatusWithoutMembers(client.teamName);
-                        switch (Settings.settingsStore.gameMode)
+                        if (team != null)
                         {
-                            case GameMode.CAREER:
-                                {
-                                    mw.Write<double>(team.funds);
-                                    mw.Write<float>(team.reputation);
-                                    mw.Write<float>(team.science);
-                                }
-                                break;
-                            case GameMode.SCIENCE:
-                                {
-                                    mw.Write<float>(team.science);
-                                }
-                                break;
+                            mw.Write<bool>(true);
+                            mw.Write<string>(client.teamName);
+                            switch (Settings.settingsStore.gameMode)
+                            {
+                                case GameMode.CAREER:
+                                    {
+                                        mw.Write<double>(team.funds);
+                                        mw.Write<float>(team.reputation);
+                                        mw.Write<float>(team.science);
+                                    }
+                                    break;
+                                case GameMode.SCIENCE:
+                                    {
+                                        mw.Write<float>(team.science);
+                                    }
+                                    break;
+                            }
+                        } else
+                        {
+                            DarkLog.Debug("Got TeamJoinRequest from " + client.playerName + " for team: " + client.teamName + " but team does not exist");
                         }
                         message.data = mw.GetMessageBytes();
                     }

@@ -538,7 +538,7 @@ namespace DarkMultiPlayer
                                 if (messageType > (Enum.GetNames(typeof(ServerMessageType)).Length))
                                 {
                                     //Malformed message, most likely from a non DMP-server.
-                                    Disconnect("Disconnected from non-DMP server");
+                                    Disconnect("Disconnected from non-DMP server: received messageType "+messageType+" max allowed messageType is: "+ (Enum.GetNames(typeof(ServerMessageType)).Length));
                                     //Returning from ReceiveCallback will break the receive loop and stop processing any further messages.
                                     return;
                                 }
@@ -924,6 +924,7 @@ namespace DarkMultiPlayer
                     //If we handshook successfully, the mod data will be available to read.
                     if (reply == 0)
                     {
+                        PlayerStatusWorker.fetch.myPlayerStatus.teamName = mr.Read<string>();
                         Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;
                         ModWorker.fetch.modControl = (ModControlMode)mr.Read<int>();
                         if (ModWorker.fetch.modControl != ModControlMode.DISABLED)
