@@ -568,7 +568,6 @@ namespace DarkMultiPlayerCommon
         CONNECTION_END,
         SCIENCE_SYNC,
         TEAM_STATUS,
-        TEAM_LIST,
         TEAM_CREATE_RESPONSE,
         TEAM_JOIN_RESPONSE,
         TEAM_LEAVE_RESPONSE

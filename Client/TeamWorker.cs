@@ -41,6 +41,11 @@ namespace DarkMultiPlayer
             ProcessTeamMessages();
         }
 
+        /// <summary>
+        /// Returns the TeamStatus of the supplied team name
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <returns></returns>
         public TeamStatus getTeamStatusByTeamName(string teamName)
         {
             foreach(TeamStatus team in teams)
@@ -51,6 +56,10 @@ namespace DarkMultiPlayer
             return null;
         }
 
+        /// <summary>
+        /// Called when the "Create Team" button in TeamWindow.cs was pressed
+        /// This sends the server a ClientMessageType.TEAM_LEAVE_REQUEST
+        /// </summary>
         public void sendTeamCreateRequest(string teamName, string password)
         {
             if (teamName.Length < 3)
@@ -97,6 +106,10 @@ namespace DarkMultiPlayer
             }
         }
 
+        /// <summary>
+        /// Called when the "Join Team" button in TeamWindow.cs was pressed
+        /// This sends the server a ClientMessageType.TEAM_JOIN_REQUEST
+        /// </summary>
         public void sendTeamJoinRequest(string teamName, string password)
         {
             if(teamName.Length < 3)
@@ -112,6 +125,10 @@ namespace DarkMultiPlayer
             }
         }
 
+        /// <summary>
+        /// Called when the "Leave Team" button in TeamWindow.cs was pressed
+        /// This sends the server a ClientMessageType.TEAM_LEAVE_REQUEST
+        /// </summary>
         public void sendTeamLeaveRequest()
         {
             using (MessageWriter mw = new MessageWriter())
@@ -128,6 +145,10 @@ namespace DarkMultiPlayer
             }
         }
 
+        /// <summary>
+        /// Called when the client received a ServerMessageType.TEAM_CREATE_RESPONSE
+        /// </summary>
+        /// <param name="messageData"></param>
         public void HandleTeamCreateResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
@@ -146,6 +167,10 @@ namespace DarkMultiPlayer
             }
         }
 
+        /// <summary>
+        /// Called when the client receives a ServerMessageType.TEAM_JOIN_RESPONSE
+        /// </summary>
+        /// <param name="messageData"></param>
         public void HandleTeamJoinResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
@@ -195,6 +220,10 @@ namespace DarkMultiPlayer
             }
         }
 
+        /// <summary>
+        /// Called when the client receives a ServerMessageType.TEAM_LEAVE_REQUEST
+        /// </summary>
+        /// <param name="messageData"></param>
         public void HandleTeamLeaveResponse(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
@@ -203,13 +232,18 @@ namespace DarkMultiPlayer
                 if (!success)
                 {
                     string error = mr.Read<string>();
-                    DarkLog.Debug("Could not leave team, error: " + error);
+                    DarkLog.Debug("Could not leave team sorry, error: " + error);
                     return;
                 }
-                DarkLog.Debug("Successfully left team!");
+                DarkLog.Debug("Successfully left team "+ PlayerStatusWorker.fetch.myPlayerStatus.teamName);
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = "";
             }
         }
+
+        /// <summary>
+        /// Called when the client receives a ServerMessageType.TEAM_STATUS
+        /// </summary>
+        /// <param name="messageData"></param>
         public void HandleTeamMessage(byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
@@ -255,6 +289,7 @@ namespace DarkMultiPlayer
                             for (int i = 0; i < teamCount; i++)
                             {
                                 TeamStatus team = new TeamStatus();
+                                team.teamName = mr.Read<string>();
                                 team.funds = mr.Read<double>();
                                 team.reputation = mr.Read<float>();
                                 team.science = mr.Read<float>();
@@ -279,28 +314,44 @@ namespace DarkMultiPlayer
         }
 
 
-
+        /// <summary>
+        /// Called when the server notifies us that a player has joined a team
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <param name="playerName"></param>
         private void HandlePlayerJoin(string teamName, string playerName)
         {
             TeamStatus team = getTeamByTeamName(teamName);
             team.teamMembers.Add(new MemberStatus(playerName));
-            // do something else? who caaares right now, check gui updates etc
         }
 
+        /// <summary>
+        /// Called when the server notifies us that a player has left a team
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <param name="playerName"></param>
         private void HandlePlayerLeave(string teamName, string playerName)
         {
             TeamStatus team = getTeamByTeamName(teamName);
             team.removeMember(playerName);
-            // ?!?
         }
 
+        /// <summary>
+        /// Called when the server sends us an updated status for a specific team
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <param name="team"></param>
         private void HandleTeamStatus(string teamName, TeamStatus team)
         {
-            // placerholder until we sync all details of the team!
             int idx = teams.FindIndex(t => t.teamName == teamName);
             teams[idx] = team;
         }
 
+        /// <summary>
+        /// Called when the server sends us the initial team state
+        /// Usually during initialisation
+        /// </summary>
+        /// <param name="allTeams"></param>
         private void HandleTeamList(List<TeamStatus> allTeams)
         {
             this.teams = allTeams;

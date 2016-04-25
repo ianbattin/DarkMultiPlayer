@@ -22,7 +22,7 @@ namespace DarkMultiPlayerServer.Messages
                 if(client.teamName != "")
                 {
                     // alter data!
-                    TeamStatus team = DBManager.getTeamStatusWithoutMembers(client.teamName);
+                    TeamStatus team = DBManager.getTeamStatus(client.teamName);
                     if (team != null)
                     {
                         if (scenarioNames[currentScenarioModule].Equals("ResearchAndDevelopment"))

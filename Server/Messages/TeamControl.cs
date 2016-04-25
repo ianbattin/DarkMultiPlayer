@@ -23,7 +23,7 @@ namespace DarkMultiPlayerServer.Messages
                     mw.Write<bool>(true);
                     mw.Write<string>(client.teamName);
 
-                    TeamStatus team = DBManager.getTeamStatusWithoutMembers(client.teamName);
+                    TeamStatus team = DBManager.getTeamStatus(client.teamName);
                     if (team == null) {
                         return;
                     }
@@ -117,11 +117,11 @@ namespace DarkMultiPlayerServer.Messages
                 {
                     client.teamName = teamName;
                     // success
-                    ServerMessage message = new ServerMessage();
-                    message.type = ServerMessageType.TEAM_JOIN_RESPONSE;
+                    ServerMessage tJoinResp = new ServerMessage();
+                    tJoinResp.type = ServerMessageType.TEAM_JOIN_RESPONSE;
                     using (MessageWriter mw = new MessageWriter())
                     {
-                        TeamStatus team = DBManager.getTeamStatusWithoutMembers(client.teamName);
+                        TeamStatus team = DBManager.getTeamStatus(client.teamName);
                         if (team != null)
                         {
                             mw.Write<bool>(true);
@@ -145,9 +145,9 @@ namespace DarkMultiPlayerServer.Messages
                         {
                             DarkLog.Debug("Got TeamJoinRequest from " + client.playerName + " for team: " + client.teamName + " but team does not exist");
                         }
-                        message.data = mw.GetMessageBytes();
+                        tJoinResp.data = mw.GetMessageBytes();
                     }
-                    ClientHandler.SendToClient(client, message, true);
+                    ClientHandler.SendToClient(client, tJoinResp, true);
                 }
                 else
                 {
@@ -160,12 +160,14 @@ namespace DarkMultiPlayerServer.Messages
                         message.data = mw.GetMessageBytes();
                     }
                     ClientHandler.SendToClient(client, message, true);
+                    sendTeamStatusJoin(client);
                 }
             }
         }
 
         public static void handleTeamLeaveRequest(ClientObject client, byte[] messageData)
         {
+            DarkLog.Debug("Received TeamLeaveRequest from client: " + client.playerName + " team is: "+client.teamName);
             if (client.teamName != "")
             {
                 DBManager.removePlayerFromTeam(client.teamName, client.playerName);
@@ -177,7 +179,89 @@ namespace DarkMultiPlayerServer.Messages
                     message.data = mw.GetMessageBytes();
                 }
                 ClientHandler.SendToClient(client, message, true);
+                sendTeamStatusLeave(client);
             }
+        }
+
+        public static void sendTeamStatusJoin(ClientObject client)
+        {
+            ServerMessage tStatus = new ServerMessage();
+            tStatus.type = ServerMessageType.TEAM_STATUS;
+            using (MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<int>((int)TeamMessageType.TEAM_JOIN);
+                mw.Write<string>(client.teamName);
+                mw.Write<string>(client.playerName);
+                tStatus.data = mw.GetMessageBytes();
+            }
+            ClientHandler.SendToAll(null, tStatus, true);
+        }
+
+        public static void sendTeamStatusLeave(ClientObject client)
+        {
+            ServerMessage tStatus = new ServerMessage();
+            tStatus.type = ServerMessageType.TEAM_STATUS;
+            using (MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<int>((int)TeamMessageType.TEAM_LEAVE);
+                mw.Write<string>(client.teamName);
+                mw.Write<string>(client.playerName);
+                tStatus.data = mw.GetMessageBytes();
+            }
+            ClientHandler.SendToAll(null, tStatus, true);
+        }
+
+        public static void sendTeamStatus(TeamStatus team)
+        {
+            ServerMessage tStatus = new ServerMessage();
+            tStatus.type = ServerMessageType.TEAM_STATUS;
+            using (MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<int>((int)TeamMessageType.TEAM_STATUS);
+                mw.Write<double>(team.funds);
+                mw.Write<float>(team.reputation);
+                mw.Write<float>(team.science);
+
+                // serialize member list
+                mw.Write<int>(team.teamMembers.Count);
+                foreach(MemberStatus member in team.teamMembers)
+                {
+                    mw.Write<string>(member.memberName);
+                    mw.Write<bool>(member.online);
+                }
+
+                tStatus.data = mw.GetMessageBytes();
+            }
+            ClientHandler.SendToAll(null, tStatus, true);
+        }
+
+        public static void sendTeamList(ClientObject client)
+        {
+            List<TeamStatus> teamList = DBManager.getTeamStatusList();
+
+            ServerMessage message = new ServerMessage();
+            message.type = ServerMessageType.TEAM_STATUS;
+
+            using(MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<int>(teamList.Count);
+                foreach(TeamStatus team in teamList)
+                {
+                    mw.Write<string>(team.teamName);
+                    mw.Write<double>(team.funds);
+                    mw.Write<float>(team.reputation);
+                    mw.Write<float>(team.science);
+
+                    mw.Write<int>(team.teamMembers.Count);
+                    foreach(MemberStatus member in team.teamMembers)
+                    {
+                        mw.Write<string>(member.memberName);
+                        mw.Write<bool>(member.online);
+                    }
+                }
+                message.data = mw.GetMessageBytes();
+            }
+            ClientHandler.SendToClient(client, message, true);
         }
     }
 }

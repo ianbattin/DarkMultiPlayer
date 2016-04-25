@@ -33,6 +33,11 @@ namespace DarkMultiPlayerServer
             DarkLog.Debug("DBManager.Reset()");
         }
 
+        /// <summary>
+        /// Initializes the database connection
+        /// Calls setupDatabase if the database does not exist
+        /// Does NOT check the integrity of the tables
+        /// </summary>
         public static void Load()
         {
             if (!File.Exists(dbFileName))
@@ -45,6 +50,9 @@ namespace DarkMultiPlayerServer
             }
         }
 
+        /// <summary>
+        /// Creates the database and required tables
+        /// </summary>
         private static void setupDatabase()
         {
             DarkLog.Debug("DBManager.setupDatabase()");
@@ -55,6 +63,7 @@ namespace DarkMultiPlayerServer
                 sql += "CREATE TABLE team (id integer PRIMARY KEY AUTOINCREMENT, name text, password text, funds real, reputation real, science real);";
                 sql += "CREATE TABLE team_members(id integer, name text, pubkey text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
                 sql += "CREATE TABLE team_research(id integer, rdtechname text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE); ";
+                sql += "CREATE TRIGGER del_team_on_last_member AFTER DELETE on team_members BEGIN DELETE FROM team  WHERE team.id IN (SELECT team.id FROM team LEFT JOIN team_members ON team.id = team_members.id GROUP BY team.id HAVING COUNT(team_members.id) = 0);END; ";
                 sql += "COMMIT;";
                 executeQry(sql);
             }
@@ -65,7 +74,17 @@ namespace DarkMultiPlayerServer
                 Environment.Exit(0);
             }
         }
-
+        /// <summary>
+        /// Creates a new team in the database
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="password"></param>
+        /// <param name="funds"></param>
+        /// <param name="reputation"></param>
+        /// <param name="science"></param>
+        /// <param name="creator"></param>
+        /// <param name="creator_pubKey"></param>
+        /// <returns></returns>
         public static int createNewTeam(string name, string password, double funds, float reputation, float science, string creator, string creator_pubKey)
         {
             try {
@@ -99,6 +118,14 @@ namespace DarkMultiPlayerServer
             }
         }
 
+        /// <summary>
+        /// Adds a new player to a team
+        /// </summary>
+        /// <param name="teamName">Name of the team</param>
+        /// <param name="password">Supplied password</param>
+        /// <param name="playerName">Name of the player</param>
+        /// <param name="pubKey">Public key of the client</param>
+        /// <returns></returns>
         public static bool addPlayerToTeam(string teamName, string password, string playerName, string pubKey)
         {
             try { 
@@ -136,6 +163,11 @@ namespace DarkMultiPlayerServer
             }
         }
 
+        /// <summary>
+        /// Removes a player from a team in the database
+        /// </summary>
+        /// <param name="teamName">Name of the team</param>
+        /// <param name="playerName">Name of the player</param>
         public static void removePlayerFromTeam(string teamName, string playerName)
         {
             try {
@@ -151,26 +183,79 @@ namespace DarkMultiPlayerServer
             }
         }
 
-        public static TeamStatus getTeamStatusWithoutMembers(string teamName)
+        /// <summary>
+        /// Fetches the TeamStatus including all team members from the database
+        /// </summary>
+        /// <param name="teamName">The name of the team</param>
+        /// <returns></returns>
+        public static TeamStatus getTeamStatus(string teamName)
         {
             try { 
-                string sql = "SELECT name,funds,reputation,science FROM team WHERE name = @teamName";
+                string sql = "SELECT id,name,funds,reputation,science FROM team WHERE name = @teamName";
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
                 command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
                 SQLiteDataReader reader = command.ExecuteReader();
                 if (!reader.Read())
                     return null;
-                TeamStatus team = new TeamStatus();
-                team.teamName = reader.GetString(0);
-                team.funds = reader.GetDouble(1);
-                team.reputation = reader.GetFloat(2);
-                team.science = reader.GetFloat(3);
+                TeamStatus team = parseTeamStatus(reader);
+
                 return team;
             } catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Fetches all the teams from the database and returns them as a list
+        /// </summary>
+        /// <returns></returns>
+        public static List<TeamStatus> getTeamStatusList()
+        {
+            List<TeamStatus> teamList = new List<TeamStatus>();
+
+            string sql = "SELECT id,name,funds,reputation,science FROM team";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TeamStatus teamStatus = parseTeamStatus(reader);
+            }
+            return teamList;
+        }
+
+        /// <summary>
+        /// internal helper function to get the status of a team
+        /// </summary>
+        /// <param name="reader">Requires the following fields from team: id,name,funds,reputation,science</param>
+        /// <returns></returns>
+        private static TeamStatus parseTeamStatus(SQLiteDataReader reader)
+        {
+            int teamid = reader.GetInt32(0);
+            TeamStatus team = new TeamStatus();
+            team.teamName = reader.GetString(1);
+            team.funds = reader.GetDouble(2);
+            team.reputation = reader.GetFloat(3);
+            team.science = reader.GetFloat(4);
+
+            string sql = "SELECT name FROM team_members where id = @id";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            command.Parameters.Add(new SQLiteParameter("@id", teamid));
+            team.teamMembers = new List<MemberStatus>();
+            SQLiteDataReader reader2 = command.ExecuteReader();
+            while (reader2.Read())
+            {
+                MemberStatus member = new MemberStatus(reader2.GetString(0));
+                if (ClientHandler.GetActivePlayerNames().Contains(member.memberName))
+                    member.online = true;
+                else
+                    member.online = false;
+                team.teamMembers.Add(member);
+            }
+
+            return team;
         }
 
         /// <summary>
@@ -202,12 +287,17 @@ namespace DarkMultiPlayerServer
             }
         }
 
-        public static string getTeamNameByPlayerName(string name)
+        /// <summary>
+        /// Fetches the team name of a supplied playername and returns it
+        /// </summary>
+        /// <param name="playerName">Name of the player</param>
+        /// <returns></returns>
+        public static string getTeamNameByPlayerName(string playerName)
         {
             try {
                 string sql = "SELECT team.name FROM team INNER JOIN team_members on team.id = team_members.id WHERE team_members.name = @name";
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-                command.Parameters.Add(new SQLiteParameter("@name", name));
+                command.Parameters.Add(new SQLiteParameter("@name", playerName));
                 SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
@@ -227,6 +317,11 @@ namespace DarkMultiPlayerServer
             }
         }
 
+        /// <summary>
+        /// Sets the science of a team to the supplied value
+        /// </summary>
+        /// <param name="teamid">id of the team</param>
+        /// <param name="science">total science(not diff!)</param>
         public static void updateTeamScience(int teamid, float science)
         {
             try {
@@ -242,6 +337,11 @@ namespace DarkMultiPlayerServer
             }
         }
 
+        /// <summary>
+        /// Internal helper to execute some SQL commands
+        /// possibly deprecated
+        /// </summary>
+        /// <param name="qry"></param>
         private static void executeQry(string qry)
         {
             DarkLog.Debug("Executing qry: " + qry);
