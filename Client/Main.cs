@@ -93,6 +93,7 @@ namespace DarkMultiPlayer
                 resetEvent.Add(AsteroidWorker.Reset);
                 resetEvent.Add(ChatWorker.Reset);
                 resetEvent.Add(TeamWindow.Reset);
+                resetEvent.Add(TeamWorker.Reset);
                 resetEvent.Add(CraftLibraryWorker.Reset);
                 resetEvent.Add(DebugWindow.Reset);
                 resetEvent.Add(DynamicTickWorker.Reset);
@@ -109,7 +110,6 @@ namespace DarkMultiPlayer
                 resetEvent.Add(ToolbarSupport.Reset);
                 resetEvent.Add(VesselWorker.Reset);
                 resetEvent.Add(WarpWorker.Reset);
-                resetEvent.Add(TeamWorker.Reset);
                 resetEvent.Add(ScienceWorker.Reset);
                 resetEvent.Add(ResearchWorker.Reset);
                 GameEvents.onHideUI.Add(() =>

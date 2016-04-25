@@ -13,7 +13,7 @@ namespace DarkMultiPlayer
         public bool workerEnabled = false;
         private static TeamWorker singleton = new TeamWorker();
         private Queue<byte[]> newTeamMessages = new Queue<byte[]>();
-        public List<TeamStatus> teams;
+        public List<TeamStatus> teams = new List<TeamStatus>();
 
         public static TeamWorker fetch
         {
@@ -25,12 +25,15 @@ namespace DarkMultiPlayer
 
         public static void Reset()
         {
-            if(singleton != null)
+            lock (Client.eventLock)
             {
-                singleton.workerEnabled = false;
+                if (singleton != null)
+                {
+                    singleton.workerEnabled = false;
+                }
+                DarkLog.Debug("Initialized TeamWorker");
+                singleton = new TeamWorker();
             }
-
-            singleton = new TeamWorker();
         }
 
         private void Update()
@@ -160,9 +163,10 @@ namespace DarkMultiPlayer
                     DarkLog.Debug("Could not create team, error: " + error);
                     return;
                 }
-                DarkLog.Debug("Successfully created team!");
                 // Created Team!
                 string teamName = mr.Read<string>();
+                DarkLog.Debug("Successfully created team!"+teamName);
+
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
             }
         }
@@ -246,67 +250,77 @@ namespace DarkMultiPlayer
         /// <param name="messageData"></param>
         public void HandleTeamMessage(byte[] messageData)
         {
+            DarkLog.Debug("HandleTeamMessage: Handling TEAM_STATUS");
+           
             using (MessageReader mr = new MessageReader(messageData))
             {
                 TeamMessageType messageType = (TeamMessageType)mr.Read<int>();
-                string teamName = mr.Read<string>();
+                DarkLog.Debug("Received TeamMessageType: " + messageType.ToString());
                 switch (messageType)
                 {
                     case TeamMessageType.TEAM_JOIN:
                         {
+                            string teamName = mr.Read<string>();
                             string playerName = mr.Read<string>();
                             HandlePlayerJoin(teamName, playerName);
                         }
                         break;
                     case TeamMessageType.TEAM_LEAVE:
                         {
+                            string teamName = mr.Read<string>();
                             string playerName = mr.Read<string>();
                             HandlePlayerLeave(teamName, playerName);
                         }
                         break;
                     case TeamMessageType.TEAM_STATUS:
                         {
+                            DarkLog.Debug("TeamMessageType is TEAM_STATUS");
+                            string teamName = mr.Read<string>();
                             TeamStatus team = new TeamStatus();
                             team.funds = mr.Read<double>();
                             team.reputation = mr.Read<float>();
                             team.science = mr.Read<float>();
                             int memberCount = mr.Read<int>();
-                            List<MemberStatus> members = new List<MemberStatus>();
+                            DarkLog.Debug("deserializing members");
+                            team.teamMembers = new List<MemberStatus>();
                             for (int j = 0; j < memberCount; j++)
                             {
-                                string memberName = mr.Read<string>();
-                                bool online = mr.Read<bool>();
-                                members.Add(new MemberStatus(memberName, online));
+                                MemberStatus member = new MemberStatus();
+                                member.memberName = mr.Read<string>();
+                                member.online = mr.Read<bool>();
+                                team.teamMembers.Add(member);
                             }
-                            team.teamMembers = members;
                             HandleTeamStatus(teamName, team);
                         }
                         break;
                     case TeamMessageType.TEAM_LIST:
                         {
                             int teamCount = mr.Read<int>();
-                            List<TeamStatus> allTeams = new List<TeamStatus>();
-                            for (int i = 0; i < teamCount; i++)
+                            DarkLog.Debug("Receiving " + teamCount.ToString() + "teams");
+                            if (teamCount > 0)
                             {
-                                TeamStatus team = new TeamStatus();
-                                team.teamName = mr.Read<string>();
-                                team.funds = mr.Read<double>();
-                                team.reputation = mr.Read<float>();
-                                team.science = mr.Read<float>();
-
-                                int memberCount = mr.Read<int>();
-                                List<MemberStatus> members = new List<MemberStatus>();
-                                for (int j = 0; j < memberCount; j++)
+                                List<TeamStatus> allTeams = new List<TeamStatus>();
+                                for (int i = 0; i < teamCount; i++)
                                 {
-                                    string memberName = mr.Read<string>();
-                                    bool online = mr.Read<bool>();
-                                    members.Add(new MemberStatus(memberName, online));
-                                }
-                                team.teamMembers = members;
-                                allTeams.Add(team);
-                            }
+                                    TeamStatus team = new TeamStatus();
+                                    team.teamName = mr.Read<string>();
+                                    team.funds = mr.Read<double>();
+                                    team.reputation = mr.Read<float>();
+                                    team.science = mr.Read<float>();
 
-                            HandleTeamList(allTeams);
+                                    int memberCount = mr.Read<int>();
+                                    DarkLog.Debug("TEAM_STATUS: memberCount is " + memberCount.ToString());
+                                    team.teamMembers = new List<MemberStatus>();
+                                    for (int j = 0; j < memberCount; j++)
+                                    {
+                                        MemberStatus member = new MemberStatus();
+                                        member.memberName = mr.Read<string>();
+                                        member.online = mr.Read<bool>();
+                                        team.teamMembers.Add(member);
+                                    }
+                                    allTeams.Add(team);
+                                }
+                            }
                         }
                         break;
                 }
@@ -322,7 +336,10 @@ namespace DarkMultiPlayer
         private void HandlePlayerJoin(string teamName, string playerName)
         {
             TeamStatus team = getTeamByTeamName(teamName);
-            team.teamMembers.Add(new MemberStatus(playerName));
+            MemberStatus member = new MemberStatus();
+            member.memberName = playerName;
+            member.online = true;
+            team.teamMembers.Add(member);
         }
 
         /// <summary>

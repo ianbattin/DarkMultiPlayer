@@ -733,18 +733,6 @@ namespace DarkMultiPlayerCommon
     {
         public string memberName;
         public bool online;
-
-        public MemberStatus(string playerName)
-        {
-            memberName = playerName;
-            online = true;
-        }
-
-        public MemberStatus(string playerName, bool online)
-        {
-            this.memberName = playerName;
-            this.online = online;
-        }
     }
     public class TeamStatus
     {

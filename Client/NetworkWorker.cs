@@ -154,6 +154,7 @@ namespace DarkMultiPlayer
                 VesselWorker.fetch.workerEnabled = true;
                 HackyInAtmoLoader.fetch.workerEnabled = true;
                 PlayerStatusWorker.fetch.workerEnabled = true;
+                TeamWorker.fetch.workerEnabled = true;
                 ScenarioWorker.fetch.workerEnabled = true;
                 DynamicTickWorker.fetch.workerEnabled = true;
                 WarpWorker.fetch.workerEnabled = true;
@@ -861,7 +862,10 @@ namespace DarkMultiPlayer
                         TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
                         break;
                     case ServerMessageType.TEAM_STATUS:
-                        TeamWorker.fetch.HandleTeamMessage(message.data);
+                        {
+                            DarkLog.Debug("NetworkWorker: Handling TEAM_STATUS");
+                            TeamWorker.fetch.HandleTeamMessage(message.data);
+                        }                        
                         break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);

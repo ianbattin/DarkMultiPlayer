@@ -221,7 +221,8 @@ namespace DarkMultiPlayerServer
 
             while (reader.Read())
             {
-                TeamStatus teamStatus = parseTeamStatus(reader);
+                TeamStatus team = parseTeamStatus(reader);
+                teamList.Add(team);
             }
             return teamList;
         }
@@ -247,10 +248,12 @@ namespace DarkMultiPlayerServer
             SQLiteDataReader reader2 = command.ExecuteReader();
             while (reader2.Read())
             {
-                MemberStatus member = new MemberStatus(reader2.GetString(0));
+                MemberStatus member = new MemberStatus();
+                member.memberName = reader2.GetString(0);
                 if (ClientHandler.GetActivePlayerNames().Contains(member.memberName))
+                {
                     member.online = true;
-                else
+                } else
                     member.online = false;
                 team.teamMembers.Add(member);
             }

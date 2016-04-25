@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DarkMultiPlayerCommon;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -103,7 +104,33 @@ namespace DarkMultiPlayer
                     TeamWorker.fetch.sendTeamLeaveRequest();
                 }
             }
+            GUILayout.Label("Team count: " + TeamWorker.fetch.teams.Count);
             GUILayout.EndVertical();
+        }
+
+        private void DrawTeamList()
+        {
+            GUILayout.BeginVertical();
+            GUILayout.Label("Teams",labelStyle);
+            foreach(TeamStatus team in TeamWorker.fetch.teams)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(team.teamName);
+                if(PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+                {
+                    if (GUILayout.Button("Join", buttonStyle))
+                    {
+                        string password = GUILayout.TextField("password");
+                        if (GUILayout.Button("Join"))
+                        {
+                            TeamWorker.fetch.sendTeamJoinRequest(team.teamName, password);
+                        }
+                    }
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.BeginVertical();
         }
 
         private void Update()

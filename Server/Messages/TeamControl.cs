@@ -83,7 +83,7 @@ namespace DarkMultiPlayerServer.Messages
                 int teamid = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
 
 
-                // now send new info  and responses!
+                // now send new info and responses!
                 ServerMessage message = new ServerMessage();
                 message.type = ServerMessageType.TEAM_CREATE_RESPONSE;
 
@@ -94,6 +94,7 @@ namespace DarkMultiPlayerServer.Messages
                         DarkLog.Debug("Successfully created team: " + teamName);
                         mw.Write<bool>(true);
                         mw.Write<string>(teamName);
+                        client.teamName = teamName;
                     }
                     else
                     {
@@ -238,12 +239,13 @@ namespace DarkMultiPlayerServer.Messages
         public static void sendTeamList(ClientObject client)
         {
             List<TeamStatus> teamList = DBManager.getTeamStatusList();
-
+            DarkLog.Debug("Sending " + teamList.Count + " teams");
             ServerMessage message = new ServerMessage();
             message.type = ServerMessageType.TEAM_STATUS;
 
             using(MessageWriter mw = new MessageWriter())
             {
+                mw.Write<int>((int)TeamMessageType.TEAM_LIST);
                 mw.Write<int>(teamList.Count);
                 foreach(TeamStatus team in teamList)
                 {
