@@ -18,6 +18,7 @@ namespace DarkMultiPlayer
         private float lastUpdateTime;
         private string newTeamName = "";
         private string password = "";
+        private List<TeamStatus> teams = new List<TeamStatus>();
         //GUI Layout
         private Rect windowRect;
         private Rect moveRect;
@@ -71,7 +72,7 @@ namespace DarkMultiPlayer
                     initialized = true;
                     InitGUI();
                 }
-                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6705 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Debug", windowStyle, layoutOptions));
+                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6705 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Team", windowStyle, layoutOptions));
             }
         }
 
@@ -104,33 +105,27 @@ namespace DarkMultiPlayer
                     TeamWorker.fetch.sendTeamLeaveRequest();
                 }
             }
-            GUILayout.Label("Team count: " + TeamWorker.fetch.teams.Count);
+            GUILayout.Label("Team count: " +teams.Count);
             GUILayout.EndVertical();
+            DrawTeamList();
         }
 
         private void DrawTeamList()
         {
             GUILayout.BeginVertical();
             GUILayout.Label("Teams",labelStyle);
+            GUILayout.Width(10f);
             foreach(TeamStatus team in TeamWorker.fetch.teams)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(team.teamName);
-                if(PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
-                {
-                    if (GUILayout.Button("Join", buttonStyle))
-                    {
-                        string password = GUILayout.TextField("password");
-                        if (GUILayout.Button("Join"))
-                        {
-                            TeamWorker.fetch.sendTeamJoinRequest(team.teamName, password);
-                        }
-                    }
-                }
                 GUILayout.EndHorizontal();
+                foreach(MemberStatus member in team.teamMembers)
+                {
+                    GUILayout.Label(member.memberName, labelStyle);
+                }
             }
-
-            GUILayout.BeginVertical();
+            GUILayout.EndVertical();
         }
 
         private void Update()
@@ -142,6 +137,7 @@ namespace DarkMultiPlayer
                 {
                     lastUpdateTime = UnityEngine.Time.realtimeSinceStartup;
                     //update values
+                    teams = TeamWorker.fetch.teams;
                 }
             }
         }

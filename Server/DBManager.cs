@@ -85,7 +85,7 @@ namespace DarkMultiPlayerServer
         /// <param name="creator"></param>
         /// <param name="creator_pubKey"></param>
         /// <returns></returns>
-        public static int createNewTeam(string name, string password, double funds, float reputation, float science, string creator, string creator_pubKey)
+        public static TeamStatus createNewTeam(string name, string password, double funds, float reputation, float science, string creator, string creator_pubKey)
         {
             try {
                 string sql = "BEGIN;";
@@ -109,12 +109,24 @@ namespace DarkMultiPlayerServer
                 command.Parameters.Add(new SQLiteParameter("@name", creator));
                 command.Parameters.Add(new SQLiteParameter("@pubkey", creator_pubKey));
                 command.ExecuteNonQuery();
-                return rowid;
+
+                TeamStatus team = new TeamStatus();
+                team.teamName = name;
+                team.funds = funds;
+                team.reputation = reputation;
+                team.science = science;
+                team.teamMembers = new List<MemberStatus>();
+                MemberStatus member = new MemberStatus();
+                member.memberName = creator;
+                member.online = true;
+                team.teamMembers.Add(member);
+
+                return team;
             } catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);
                 executeQry("ROLLBACK;");
-                return -1;
+                return null;
             }
         }
 
@@ -201,6 +213,27 @@ namespace DarkMultiPlayerServer
 
                 return team;
             } catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+                return null;
+            }
+        }
+
+        public static TeamStatus getTeamStatusByPlayerName(string playerName)
+        {
+            try
+            {
+                string sql = "SELECT id,name,funds,reputation,science FROM team INNER JOIN team_members on team.id = team_members.id WHERE team_members.name = @playerName";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@playerName", playerName));
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (!reader.Read())
+                    return null;
+                TeamStatus team = parseTeamStatus(reader);
+
+                return team;
+            }
+            catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);
                 return null;
@@ -325,15 +358,15 @@ namespace DarkMultiPlayerServer
         /// </summary>
         /// <param name="teamid">id of the team</param>
         /// <param name="science">total science(not diff!)</param>
-        public static void updateTeamScience(int teamid, float science)
+        public static void updateTeamScience(string teamName, float science)
         {
             try {
-                string sql = "UPDATE team SET science = @science WHERE id = @teamid";
+                string sql = "UPDATE team SET science = @science WHERE name = @teamName";
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
                 command.Parameters.Add(new SQLiteParameter("@science", science));
-                command.Parameters.Add(new SQLiteParameter("@teamid", teamid));
+                command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
                 int ret = command.ExecuteNonQuery();
-                DarkLog.Debug("DBManager: updated team science of teamid: " + teamid.ToString() + " to science: " + science.ToString() + "rows changed: " + ret.ToString());
+                DarkLog.Debug("DBManager: updated team science of team: " + teamName + " to science: " + science.ToString() + "rows changed: " + ret.ToString());
             } catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);

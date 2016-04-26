@@ -167,6 +167,24 @@ namespace DarkMultiPlayer
                 string teamName = mr.Read<string>();
                 DarkLog.Debug("Successfully created team!"+teamName);
 
+                TeamStatus team = new TeamStatus();
+                team.teamName = teamName;
+                team.funds = mr.Read<double>();
+                team.reputation = mr.Read<float>();
+                team.science = mr.Read<float>();
+                int memberCount = mr.Read<int>();
+                DarkLog.Debug("deserializing "+memberCount+" members");
+                team.teamMembers = new List<MemberStatus>();
+                for (int j = 0; j < memberCount; j++)
+                {
+                    MemberStatus member = new MemberStatus();
+                    member.memberName = mr.Read<string>();
+                    member.online = mr.Read<bool>();
+                    team.teamMembers.Add(member);
+                }
+                HandleTeamStatus(teamName, team);
+
+
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
             }
         }
@@ -191,6 +209,7 @@ namespace DarkMultiPlayer
                 string teamName = mr.Read<string>();
                 DarkLog.Debug("teamName is: " + teamName);
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
+                //HandlePlayerJoin(teamName, PlayerStatusWorker.fetch.myPlayerStatus.playerName);
 
                 // Receive funds/reputation/science/research status
 
@@ -320,6 +339,7 @@ namespace DarkMultiPlayer
                                     }
                                     allTeams.Add(team);
                                 }
+                                HandleTeamList(allTeams);
                             }
                         }
                         break;
@@ -335,11 +355,23 @@ namespace DarkMultiPlayer
         /// <param name="playerName"></param>
         private void HandlePlayerJoin(string teamName, string playerName)
         {
-            TeamStatus team = getTeamByTeamName(teamName);
-            MemberStatus member = new MemberStatus();
-            member.memberName = playerName;
-            member.online = true;
-            team.teamMembers.Add(member);
+            DarkLog.Debug("got HandlePlayerJoin for playerName: " + playerName+ " and teamName: "+teamName);
+            int idx = teams.FindIndex(team => team.teamName == teamName);
+            if (idx >= 0)
+            {
+                DarkLog.Debug("Modifying teams["+idx.ToString()+"]");
+                MemberStatus member = new MemberStatus();
+                member.memberName = playerName;
+                member.online = true;
+                teams[idx].teamMembers.Add(member);
+
+                int psIdx = PlayerStatusWorker.fetch.playerStatusList.FindIndex(player => player.playerName == playerName);
+                PlayerStatusWorker.fetch.playerStatusList[psIdx].teamName = teamName;
+            }
+            else
+            {
+                DarkLog.Debug("Tried to HandlePlayerJoin on team that does not exist: " + teamName);
+            }
         }
 
         /// <summary>
@@ -349,8 +381,26 @@ namespace DarkMultiPlayer
         /// <param name="playerName"></param>
         private void HandlePlayerLeave(string teamName, string playerName)
         {
-            TeamStatus team = getTeamByTeamName(teamName);
-            team.removeMember(playerName);
+            DarkLog.Debug("HandlePlayerLeave-> teamName: " + teamName + " playerName: " + playerName);
+
+            int idx = teams.FindIndex(team => team.teamName == teamName);
+            if (idx >= 0)
+            {
+                DarkLog.Debug("Modifying teams[" + idx.ToString() + "]");
+                teams[idx].teamMembers.RemoveAll(member => member.memberName == playerName);
+                if(teams[idx].teamMembers.Count == 0)
+                {
+                    DarkLog.Debug("Last member left the team, deleting team");
+                    teams.RemoveAt(idx);
+                }
+
+                int psIdx = PlayerStatusWorker.fetch.playerStatusList.FindIndex(player => player.playerName == playerName);
+                PlayerStatusWorker.fetch.playerStatusList[psIdx].teamName = "";
+            }
+            else
+            {
+                DarkLog.Debug("Player: " + playerName + " left team: " + teamName + " but that team does not exist");
+            }
         }
 
         /// <summary>
@@ -361,7 +411,22 @@ namespace DarkMultiPlayer
         private void HandleTeamStatus(string teamName, TeamStatus team)
         {
             int idx = teams.FindIndex(t => t.teamName == teamName);
-            teams[idx] = team;
+            DarkLog.Debug("HandleTeamStatus idx is: " + idx);
+            if (idx != -1)
+                teams[idx] = team;
+            else
+                teams.Add(team);
+
+            foreach(MemberStatus member in team.teamMembers)
+            {
+                int index = PlayerStatusWorker.fetch.playerStatusList.FindIndex(player => player.playerName == member.memberName);
+                if (index >= 0)
+                {
+                    PlayerStatusWorker.fetch.playerStatusList[index].teamName = teamName;
+                }
+
+            }
+
         }
 
         /// <summary>
@@ -372,23 +437,6 @@ namespace DarkMultiPlayer
         private void HandleTeamList(List<TeamStatus> allTeams)
         {
             this.teams = allTeams;
-        }
-
-        // TeamStatus helper functions, could be done with lambda functions ;)
-
-        private TeamStatus getTeamByTeamName(string teamName)
-        {
-            return teams.Find(team => team.teamName == teamName);
-        }
-
-        private TeamStatus getTeamByMemberName(string playerName)
-        {
-            foreach(TeamStatus team in teams)
-            {
-                if (team.teamMembers.Any(member => member.memberName == playerName))
-                    return team;
-            }
-            return null;
         }
     }
 }

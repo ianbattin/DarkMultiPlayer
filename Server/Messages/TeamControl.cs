@@ -80,7 +80,7 @@ namespace DarkMultiPlayerServer.Messages
                         break;
                 }
 
-                int teamid = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
+                TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
 
 
                 // now send new info and responses!
@@ -89,22 +89,34 @@ namespace DarkMultiPlayerServer.Messages
 
                 using (MessageWriter mw = new MessageWriter())
                 {
-                    if (teamid >= 0)
+                    if (team != null)
                     {
                         DarkLog.Debug("Successfully created team: " + teamName);
                         mw.Write<bool>(true);
                         mw.Write<string>(teamName);
                         client.teamName = teamName;
+                        mw.Write<double>(team.funds);
+                        mw.Write<float>(team.reputation);
+                        mw.Write<float>(team.science);
+                        mw.Write<int>(team.teamMembers.Count);
+                        DarkLog.Debug("handleTeamCreateRequest: sending " + team.teamMembers.Count + " teamMembers");
+                        foreach(MemberStatus member in team.teamMembers)
+                        {
+                            mw.Write<string>(member.memberName);
+                            // we can hack here, since we know that the creator is online
+                            mw.Write<bool>(true);
+                        }
                     }
                     else
                     {
-                        DarkLog.Debug("Team creation failed with errorcode: " + teamid);
+                        DarkLog.Debug("Team creation failed for teamName: " + team.teamName);
                         mw.Write<bool>(false);
-                        mw.Write<string>("Could not create team, errorCode: " + teamid);
+                        mw.Write<string>("Could not create team");
                     }
                     message.data = mw.GetMessageBytes();
                 }
                 ClientHandler.SendToClient(client, message, true);
+                sendTeamStatus(client, team);
             }
         }
 
@@ -149,6 +161,7 @@ namespace DarkMultiPlayerServer.Messages
                         tJoinResp.data = mw.GetMessageBytes();
                     }
                     ClientHandler.SendToClient(client, tJoinResp, true);
+                    sendTeamStatusJoin(client);
                 }
                 else
                 {
@@ -161,7 +174,6 @@ namespace DarkMultiPlayerServer.Messages
                         message.data = mw.GetMessageBytes();
                     }
                     ClientHandler.SendToClient(client, message, true);
-                    sendTeamStatusJoin(client);
                 }
             }
         }
@@ -195,7 +207,7 @@ namespace DarkMultiPlayerServer.Messages
                 mw.Write<string>(client.playerName);
                 tStatus.data = mw.GetMessageBytes();
             }
-            ClientHandler.SendToAll(null, tStatus, true);
+            ClientHandler.SendToAll(client, tStatus, true);
         }
 
         public static void sendTeamStatusLeave(ClientObject client)
@@ -212,13 +224,14 @@ namespace DarkMultiPlayerServer.Messages
             ClientHandler.SendToAll(null, tStatus, true);
         }
 
-        public static void sendTeamStatus(TeamStatus team)
+        public static void sendTeamStatus(ClientObject client, TeamStatus team)
         {
             ServerMessage tStatus = new ServerMessage();
             tStatus.type = ServerMessageType.TEAM_STATUS;
             using (MessageWriter mw = new MessageWriter())
             {
                 mw.Write<int>((int)TeamMessageType.TEAM_STATUS);
+                mw.Write<string>(team.teamName);
                 mw.Write<double>(team.funds);
                 mw.Write<float>(team.reputation);
                 mw.Write<float>(team.science);
@@ -233,7 +246,7 @@ namespace DarkMultiPlayerServer.Messages
 
                 tStatus.data = mw.GetMessageBytes();
             }
-            ClientHandler.SendToAll(null, tStatus, true);
+            ClientHandler.SendToAll(client, tStatus, true);
         }
 
         public static void sendTeamList(ClientObject client)

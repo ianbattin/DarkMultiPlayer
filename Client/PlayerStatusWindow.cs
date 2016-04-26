@@ -604,7 +604,7 @@ namespace DarkMultiPlayer
                 chatButtonStyle = highlightStyle;
             }
             ChatWorker.fetch.display = GUILayout.Toggle(ChatWorker.fetch.display, "C", chatButtonStyle);
-            TeamWindow.fetch.display = GUILayout.Toggle(TeamWindow.fetch.display, "T", chatButtonStyle);
+            TeamWindow.fetch.display = GUILayout.Toggle(TeamWindow.fetch.display, "T", buttonStyle);
             DebugWindow.fetch.display = GUILayout.Toggle(DebugWindow.fetch.display, "D", buttonStyle);
             GUIStyle screenshotButtonStyle = buttonStyle;
             if (ScreenshotWorker.fetch.screenshotButtonHighlighted)
