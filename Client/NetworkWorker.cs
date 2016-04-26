@@ -862,7 +862,10 @@ namespace DarkMultiPlayer
                         TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
                         break;
                     case ServerMessageType.TEAM_STATUS:
-                            TeamWorker.fetch.HandleTeamMessage(message.data);                     
+                        TeamWorker.fetch.HandleTeamMessage(message.data);                     
+                        break;
+                    case ServerMessageType.SCIENCE_SYNC:
+                        ScienceWorker.fetch.handleScienceSyncMessage(message.data);
                         break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);

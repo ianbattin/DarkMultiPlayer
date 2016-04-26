@@ -11,7 +11,8 @@ namespace DarkMultiPlayerServer.Messages
     {
         public static void HandleScienceSync(ClientObject client, byte[] messageData)
         {
-            if (client.authenticated && client.teamName == "")
+            DarkLog.Debug("HandleScienceSync: received new Science");
+            if (client.teamName != "")
             {
                 TeamStatus team = DBManager.getTeamStatus(client.teamName);
                 using (MessageReader mr = new MessageReader(messageData))
