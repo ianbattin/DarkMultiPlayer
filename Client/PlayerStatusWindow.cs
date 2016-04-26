@@ -146,15 +146,15 @@ namespace DarkMultiPlayer
                 //Calculate the minimum size of the minimize window by drawing it off the screen
                 if (!calculatedMinSize)
                 {
-                    minWindowRect = GUILayout.Window(6701 + Client.WINDOW_OFFSET, minWindowRect, DrawMaximize, "DMP", windowStyle, minLayoutOptions);
+                    minWindowRect = GUILayout.Window((int)WindowId.MAIN_WINDOW + Client.WINDOW_OFFSET, minWindowRect, DrawMaximize, "DMP", windowStyle, minLayoutOptions);
                 }
                 if (!safeMinimized)
                 {
-                    windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6703 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Status", windowStyle, layoutOptions));
+                    windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.PLAYER_STATUS_WINDOW + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Status", windowStyle, layoutOptions));
                 }
                 else
                 {
-                    minWindowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6703 + Client.WINDOW_OFFSET, minWindowRect, DrawMaximize, "DMP", windowStyle, minLayoutOptions));
+                    minWindowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.PLAYER_STATUS_WINDOW + Client.WINDOW_OFFSET, minWindowRect, DrawMaximize, "DMP", windowStyle, minLayoutOptions));
                 }
             }
             CheckWindowLock();

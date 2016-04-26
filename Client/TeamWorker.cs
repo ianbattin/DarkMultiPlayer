@@ -45,21 +45,6 @@ namespace DarkMultiPlayer
         }
 
         /// <summary>
-        /// Returns the TeamStatus of the supplied team name
-        /// </summary>
-        /// <param name="teamName"></param>
-        /// <returns></returns>
-        public TeamStatus getTeamStatusByTeamName(string teamName)
-        {
-            foreach(TeamStatus team in teams)
-            {
-                if (team.teamName.Equals(teamName))
-                    return team;
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Called when the "Create Team" button in TeamWindow.cs was pressed
         /// This sends the server a ClientMessageType.TEAM_LEAVE_REQUEST
         /// </summary>

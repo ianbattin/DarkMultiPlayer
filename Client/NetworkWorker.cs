@@ -536,7 +536,7 @@ namespace DarkMultiPlayer
                                     Disconnect("Disconnected from pre-v0.2 DMP server");
                                     return;
                                 }
-                                if (messageType > (Enum.GetNames(typeof(ServerMessageType)).Length))
+                                if (messageType >= (Enum.GetNames(typeof(ServerMessageType)).Length))
                                 {
                                     //Malformed message, most likely from a non DMP-server.
                                     Disconnect("Disconnected from non-DMP server: received messageType "+messageType+" max allowed messageType is: "+ (Enum.GetNames(typeof(ServerMessageType)).Length));
@@ -852,6 +852,12 @@ namespace DarkMultiPlayer
                     case ServerMessageType.CONNECTION_END:
                         HandleConnectionEnd(message.data);
                         break;
+                    case ServerMessageType.SCIENCE_SYNC:
+                        ScienceWorker.fetch.handleScienceSyncMessage(message.data);
+                        break;
+                    case ServerMessageType.TEAM_STATUS:
+                        TeamWorker.fetch.HandleTeamMessage(message.data);
+                        break;
                     case ServerMessageType.TEAM_CREATE_RESPONSE:
                         TeamWorker.fetch.HandleTeamCreateResponse(message.data);
                         break;
@@ -860,12 +866,6 @@ namespace DarkMultiPlayer
                         break;
                     case ServerMessageType.TEAM_LEAVE_RESPONSE:
                         TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
-                        break;
-                    case ServerMessageType.TEAM_STATUS:
-                        TeamWorker.fetch.HandleTeamMessage(message.data);                     
-                        break;
-                    case ServerMessageType.SCIENCE_SYNC:
-                        ScienceWorker.fetch.handleScienceSyncMessage(message.data);
                         break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);

@@ -10,7 +10,6 @@ namespace DarkMultiPlayer
     public class TeamWindow
     {
         public bool display = false;
-        public bool inTeam = false;
         private bool safeDisplay = false;
         private bool initialized = false;
         private static TeamWindow singleton;
@@ -72,7 +71,7 @@ namespace DarkMultiPlayer
                     initialized = true;
                     InitGUI();
                 }
-                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6705 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Team", windowStyle, layoutOptions));
+                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.TEAM_WINDOW + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Team", windowStyle, layoutOptions));
             }
         }
 

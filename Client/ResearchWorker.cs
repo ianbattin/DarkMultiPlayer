@@ -63,22 +63,21 @@ namespace DarkMultiPlayer
             {
             }
             //ResearchAndDevelopment.Instance.SetTechState(status.techID, node);
+        }
 
-            /*
-            
+        /*
         private void OnResearchAllConfirm()
         {
-            foreach (RDNode node in FindObjectsOfType(typeof(RDNode)))
+        foreach (RDNode node in FindObjectsOfType(typeof(RDNode)))
+        {
+            if (node.tech != null && node.IsResearched)
             {
-                if (node.tech != null && node.IsResearched)
-                {
-                    node.tech.AutoPurchaseAllParts();
-                    node.graphics.SetAvailablePartsCircle(node.PartsNotUnlocked());
-                }
+                node.tech.AutoPurchaseAllParts();
+                node.graphics.SetAvailablePartsCircle(node.PartsNotUnlocked());
             }
-            OnGUIRnDComplexDespawn();
         }
-            */
+        OnGUIRnDComplexDespawn();
         }
+        */
     }
 }

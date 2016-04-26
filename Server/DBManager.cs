@@ -11,39 +11,18 @@ namespace DarkMultiPlayerServer
 
     public class DBManager
     {
-        private static DBManager instance;
         private static string dbFileName;
         private static SQLiteConnection m_dbConnection;
 
-        public static DBManager fetch
+        public static void Init()
         {
-            get
-            {
-                if(instance == null)
-                {
-                    instance = new DBManager();
-                }
-                return instance;
-            }
-        }
-
-        public static void Reset()
-        {
+            DarkLog.Debug("Initializing DBManager");
             dbFileName = Path.Combine(Server.universeDirectory,"dmp.sqlite");
-            DarkLog.Debug("DBManager.Reset()");
-        }
-
-        /// <summary>
-        /// Initializes the database connection
-        /// Calls setupDatabase if the database does not exist
-        /// Does NOT check the integrity of the tables
-        /// </summary>
-        public static void Load()
-        {
             if (!File.Exists(dbFileName))
             {
                 setupDatabase();
-            } else
+            }
+            else
             {
                 m_dbConnection = new SQLiteConnection("Data Source=Universe/dmp.sqlite;Version=3;");
                 m_dbConnection.Open();

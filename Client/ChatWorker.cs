@@ -736,7 +736,7 @@ namespace DarkMultiPlayer
                     ignoreChatInput = true;
                     selectTextBox = true;
                 }
-                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6704 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer Chat", windowStyle, windowLayoutOptions));
+                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.CHAT_WINDOW + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer Chat", windowStyle, windowLayoutOptions));
             }
             CheckWindowLock();
         }

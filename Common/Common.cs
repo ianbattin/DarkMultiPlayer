@@ -775,6 +775,23 @@ namespace DarkMultiPlayerCommon
         public double planetTime = 0;
     }
 
+    public enum WindowId : int
+    {
+        MAIN_WINDOW = 6701,
+        CONNECTION_WINDOW = 6702,
+        PLAYER_STATUS_WINDOW = 6703,
+        CHAT_WINDOW = 6704,
+        DEBUG_WINDOW = 6705,
+        MOD_WINDOW = 6706,
+        CRAFT_PLAYER_WINDOW = 6707,
+        CRAFT_LIBRARY_WINDOW = 6708,
+        SCREENSHOT_WINDOW = 6710,
+        OPTIONS_WINDOW = 6711,
+        UNIVERSE_CONVERTER_WINDOW = 6712,
+        DISCLAIMER_WINDOW = 6713,
+        TEAM_WINDOW = 6714
+    }
+
     public enum HandshakeReply : int
     {
         HANDSHOOK_SUCCESSFULLY = 0,
