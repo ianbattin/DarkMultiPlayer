@@ -1996,6 +1996,7 @@ namespace DarkMultiPlayer
             QueueOutgoingMessage(newMessage, true);
         }
 
+        // ScienceWorker
         public void SendScienceSyncMessage(byte[] messageData)
         {
             ClientMessage newMessage = new ClientMessage();
@@ -2004,6 +2005,14 @@ namespace DarkMultiPlayer
             QueueOutgoingMessage(newMessage, true);
         }
 
+        // CareerWorker
+        public void SendFundsChangedMessage(byte[] messageData)
+        {
+
+        }
+
+
+        // TeamWorker
         public void SendTeamCreateRequest(byte[] messageData)
         {
             ClientMessage newMessage = new ClientMessage();
@@ -2024,6 +2033,31 @@ namespace DarkMultiPlayer
         {
             ClientMessage newMessage = new ClientMessage();
             newMessage.type = ClientMessageType.TEAM_LEAVE_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        // Research
+        public void SendResearchTechState(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_TECH_STATE;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendResearchTechUnlocked(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_TECH_UNLOCKED;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendPartPurchased(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_PART_PURCHASED;
             newMessage.data = messageData;
             QueueOutgoingMessage(newMessage, true);
         }

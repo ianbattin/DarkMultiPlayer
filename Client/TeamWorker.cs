@@ -12,7 +12,6 @@ namespace DarkMultiPlayer
     {
         public bool workerEnabled = false;
         private static TeamWorker singleton = new TeamWorker();
-        private Queue<byte[]> newTeamMessages = new Queue<byte[]>();
         public List<TeamStatus> teams = new List<TeamStatus>();
 
         public static TeamWorker fetch
@@ -40,8 +39,6 @@ namespace DarkMultiPlayer
         {
             if (!workerEnabled)
                 return;
-
-            ProcessTeamMessages();
         }
 
         /// <summary>
@@ -125,14 +122,6 @@ namespace DarkMultiPlayer
             }
         }
 
-        public void ProcessTeamMessages()
-        {
-            while (newTeamMessages.Count > 0)
-            {
-                HandleTeamMessage(newTeamMessages.Dequeue());
-            }
-        }
-
         /// <summary>
         /// Called when the client received a ServerMessageType.TEAM_CREATE_RESPONSE
         /// </summary>
@@ -202,9 +191,9 @@ namespace DarkMultiPlayer
                 {
                     //DarkLog.Debug("HandleTeamJoinResponse: ");
                     double funds = mr.Read<double>();
-                    ResearchWorker.fetch.syncFundsWithTeam(funds);
+                    CareerWorker.fetch.syncFundsWithTeam(funds);
                     float reputation = mr.Read<float>();
-                    ResearchWorker.fetch.syncReputationWithTeam(reputation);
+                    CareerWorker.fetch.syncReputationWithTeam(reputation);
                     float science = mr.Read<float>();
                     ScienceWorker.fetch.syncScienceWithTeam(science);
                 }

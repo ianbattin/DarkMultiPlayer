@@ -134,6 +134,11 @@ namespace DarkMultiPlayer
                     GUILayout.Label("Profiling statistics unavailable without a high resolution timer");
                 }
             }
+            if (GUILayout.Button("Enumerate available techIDs", buttonStyle))
+            {
+                ResearchWorker.enumerateRDTech();
+            }
+
             GUILayout.EndVertical();
         }
 

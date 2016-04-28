@@ -531,7 +531,10 @@ namespace DarkMultiPlayerCommon
         SCIENCE_SYNC,
         TEAM_CREATE_REQUEST,
         TEAM_JOIN_REQUEST,
-        TEAM_LEAVE_REQUEST
+        TEAM_LEAVE_REQUEST,
+        RESEARCH_TECH_STATE,
+        RESEARCH_TECH_UNLOCKED,
+        RESEARCH_PART_PURCHASED
     }
 
     public enum ServerMessageType
@@ -570,7 +573,10 @@ namespace DarkMultiPlayerCommon
         TEAM_STATUS,
         TEAM_CREATE_RESPONSE,
         TEAM_JOIN_RESPONSE,
-        TEAM_LEAVE_RESPONSE
+        TEAM_LEAVE_RESPONSE,
+        RESEARCH_TECH_STATE,
+        RESEARCH_TECH_UNLOCKED,
+        RESEARCH_PART_PURCHASED
     }
 
     public enum ConnectionStatus
