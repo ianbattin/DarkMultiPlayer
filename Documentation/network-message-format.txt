@@ -141,6 +141,10 @@ string - teamName
 string - password
 
 TEAM_LEAVE_REQUEST:
+<empty>
+
+RESEARCH_TECH_STATE:
+
 
 ===Server only===
 HANDSHAKE_REPLY: int - Handshake status

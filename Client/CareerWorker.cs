@@ -1,4 +1,5 @@
 ﻿using DarkMultiPlayerCommon;
+using MessageStream2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,18 +32,57 @@ namespace DarkMultiPlayer
             DarkLog.Debug("CareerWorker: Reset");
             GameEvents.OnFundsChanged.Add(singleton.onFundsChanged);
             GameEvents.OnReputationChanged.Add(singleton.onReputationChanged);
-
         }
 
 
         public void onFundsChanged(double funds, TransactionReasons reasons)
         {
-
+            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+                return;
+            DarkLog.Debug("onFundsChanged: new funds is: " + funds.ToString());
+            using (MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<double>(funds);
+                NetworkWorker.fetch.SendFundsChangedMessage(mw.GetMessageBytes());
+            }
         }
 
         public void onReputationChanged(float reputation, TransactionReasons reasons)
         {
+            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+                return;
+            DarkLog.Debug("onReputationChanged: new reputation is: " + reputation.ToString());
+            using (MessageWriter mw = new MessageWriter())
+            {
+                mw.Write<float>(reputation);
+                NetworkWorker.fetch.SendReputationChangedMessage(mw.GetMessageBytes());
+            }
+        }
 
+        // Networking
+
+        public void handleFundsChanged(byte[] messageData)
+        {
+            using (MessageReader mr = new MessageReader(messageData))
+            {
+                string teamName = mr.Read<string>();
+                double funds = mr.Read<double>();
+                if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+                    syncFundsWithTeam(funds);
+                TeamWorker.fetch.teams.Find(team => team.teamName == teamName).funds = funds;
+            }
+        }
+
+        public void handleReputationChanged(byte[] messageData)
+        {
+            using (MessageReader mr = new MessageReader(messageData))
+            {
+                string teamName = mr.Read<string>();
+                float reputation = mr.Read<float>();
+                if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+                    syncReputationWithTeam(reputation);
+                TeamWorker.fetch.teams.Find(team => team.teamName == teamName).reputation = reputation;
+            }
         }
 
         public void syncFundsWithTeam(double funds)

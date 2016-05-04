@@ -9,6 +9,8 @@ namespace DarkMultiPlayerServer.Messages
 {
     public class TeamControl
     {
+        public static List<TeamStatus> teams = new List<TeamStatus>();
+
         public static void handleTeamCreateRequest(ClientObject client, byte[] messageData)
         {
             using (MessageReader mr = new MessageReader(messageData))
@@ -41,7 +43,7 @@ namespace DarkMultiPlayerServer.Messages
                 }
 
                 TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
-
+                teams.Add(team);
 
                 // now send new info and responses!
                 ServerMessage message = new ServerMessage();

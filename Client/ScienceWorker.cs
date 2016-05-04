@@ -36,13 +36,14 @@ namespace DarkMultiPlayer
                 // yes I can actually spell received
                 GameEvents.OnScienceRecieved.Add(singleton.onScienceReceived);
             }
-
         }
 
 
         public void onScienceReceived(float science, ScienceSubject subject, ProtoVessel vessel, bool something)
         {
             Debug.Log("onScienceReceived: received " + science.ToString() + " science with subject: " + subject.title);
+            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+                return;
             using (MessageWriter mw = new MessageWriter())
             {
                 mw.Write<float>(science);
@@ -66,7 +67,6 @@ namespace DarkMultiPlayer
                 mw.Write<float>(science);
                 NetworkWorker.fetch.SendScienceSyncMessage(mw.GetMessageBytes());
             }
-            
         }
 
         public void handleScienceSyncMessage(byte[] messageData)
@@ -79,14 +79,12 @@ namespace DarkMultiPlayer
                 DarkLog.Debug("handleScienceSyncMessage: teamName is: " + teamName);
                 if(teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
                     syncScienceWithTeam(science);
-                else
+
+                int idx = TeamWorker.fetch.teams.FindIndex(team => team.teamName == teamName);
+                if (idx >= 0)
                 {
-                    int idx = TeamWorker.fetch.teams.FindIndex(team => team.teamName == teamName);
-                    if (idx >= 0)
-                    {
-                        TeamWorker.fetch.teams[idx].science += science;
-                    }
-                }
+                    TeamWorker.fetch.teams[idx].science += science;
+                }   
             }
         }
         /// <summary>

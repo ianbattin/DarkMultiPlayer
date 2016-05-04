@@ -852,6 +852,12 @@ namespace DarkMultiPlayer
                     case ServerMessageType.CONNECTION_END:
                         HandleConnectionEnd(message.data);
                         break;
+                    case ServerMessageType.FUNDS_SYNC:
+                        CareerWorker.fetch.handleFundsChanged(message.data);
+                        break;
+                    case ServerMessageType.REPUTATION_SYNC:
+                        CareerWorker.fetch.handleReputationChanged(message.data);
+                        break;
                     case ServerMessageType.SCIENCE_SYNC:
                         ScienceWorker.fetch.handleScienceSyncMessage(message.data);
                         break;
@@ -866,6 +872,15 @@ namespace DarkMultiPlayer
                         break;
                     case ServerMessageType.TEAM_LEAVE_RESPONSE:
                         TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_TECH_STATE:
+                        ResearchWorker.fetch.handleResearchTechState(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_TECH_UNLOCKED:
+                        ResearchWorker.fetch.handleResearchTechUnlocked(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_PART_PURCHASED:
+                        ResearchWorker.fetch.handlePartPurchased(message.data);
                         break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
@@ -2008,7 +2023,18 @@ namespace DarkMultiPlayer
         // CareerWorker
         public void SendFundsChangedMessage(byte[] messageData)
         {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.FUNDS_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
 
+        public void SendReputationChangedMessage(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.REPUTATION_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
         }
 
 

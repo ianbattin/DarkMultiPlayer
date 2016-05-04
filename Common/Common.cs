@@ -528,6 +528,8 @@ namespace DarkMultiPlayerCommon
         MOD_DATA,
         SPLIT_MESSAGE,
         CONNECTION_END,
+        FUNDS_SYNC,
+        REPUTATION_SYNC,
         SCIENCE_SYNC,
         TEAM_CREATE_REQUEST,
         TEAM_JOIN_REQUEST,
@@ -569,6 +571,8 @@ namespace DarkMultiPlayerCommon
         MOD_DATA,
         SPLIT_MESSAGE,
         CONNECTION_END,
+        FUNDS_SYNC,
+        REPUTATION_SYNC,
         SCIENCE_SYNC,
         TEAM_STATUS,
         TEAM_CREATE_RESPONSE,
@@ -742,16 +746,15 @@ namespace DarkMultiPlayerCommon
     }
     public class TeamStatus
     {
+        /// <summary>
+        /// Server only
+        /// </summary>
+        public int teamID;
         public string teamName;
         public List<MemberStatus> teamMembers = new List<MemberStatus>();
         public double funds;
         public float reputation;
         public float science;
-
-        public void removeMember(string playerName)
-        {
-            teamMembers.RemoveAll(member => member.memberName == playerName);
-        }
     }
 
     public class RDNodeStatus

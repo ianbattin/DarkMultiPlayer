@@ -66,27 +66,6 @@ namespace DarkMultiPlayer
                     mw.Write<float>(ResearchAndDevelopment.Instance.Science);
                 }
 
-                // todo later find a way/optional to sync research for now sync only rep/science/funds(maybe not even funds)
-                //List<RDNodeStatus> nodesToSync = new List<RDNodeStatus>();
-                /*foreach(RDNode node in RDController.Instance.nodes)
-                {
-                    if ((node.state & RDNode.State.RESEARCHED) != 0)
-                    {
-                        DarkLog.Debug("sendTeamCreateRequest: techID: " + node.tech.techID + " is researched");
-                        nodesToSync.Add(new RDNodeStatus(node.tech.techID, true));
-                    } else
-                    {
-                        DarkLog.Debug("sendTeamCreateRequest: techID: " + node.tech.techID + " is NOT researched");
-                        nodesToSync.Add(new RDNodeStatus(node.tech.techID, false));
-                    }
-                }
-                mw.Write<int>(nodesToSync.Count);
-                foreach(RDNodeStatus nS in nodesToSync)
-                {
-                    mw.Write<string>(nS.techID);
-                    mw.Write<bool>(nS.researched);
-                }*/
-
                 NetworkWorker.fetch.SendTeamCreateRequest(mw.GetMessageBytes());
             }
         }
@@ -158,8 +137,8 @@ namespace DarkMultiPlayer
                 }
                 HandleTeamStatus(teamName, team);
 
-
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
+                ResearchWorker.fetch.sendInitialTechState();
             }
         }
 
@@ -203,7 +182,7 @@ namespace DarkMultiPlayer
                     DarkLog.Debug("trying to sync science");
                     ScienceWorker.fetch.syncScienceWithTeam(science);
                 }
-
+                
                 /*List<RDNodeStatus> RDStatus = new List<RDNodeStatus>();
                 int numRD = mr.Read<int>();
                 for(int i = 0; i<numRD; i++)
@@ -358,6 +337,10 @@ namespace DarkMultiPlayer
             DarkLog.Debug("HandlePlayerLeave-> teamName: " + teamName + " playerName: " + playerName);
 
             int idx = teams.FindIndex(team => team.teamName == teamName);
+            if(idx<(teams.Count - 1))
+            {
+                DarkLog.Debug("Something went wrong, idx is: " + idx + " teams.Count is: " + teams.Count);
+            }
             if (idx >= 0)
             {
                 DarkLog.Debug("Modifying teams[" + idx.ToString() + "]");
@@ -365,11 +348,18 @@ namespace DarkMultiPlayer
                 if(teams[idx].teamMembers.Count == 0)
                 {
                     DarkLog.Debug("Last member left the team, deleting team");
-                    teams.RemoveAt(idx);
+                    //teams.RemoveAt(idx);
+                    teams.RemoveAll(team => team.teamName == teamName);
                 }
 
-                int psIdx = PlayerStatusWorker.fetch.playerStatusList.FindIndex(player => player.playerName == playerName);
-                PlayerStatusWorker.fetch.playerStatusList[psIdx].teamName = "";
+                if(PlayerStatusWorker.fetch.myPlayerStatus.playerName == playerName)
+                {
+                    PlayerStatusWorker.fetch.myPlayerStatus.teamName = "";
+                } else
+                {
+                    int psIdx = PlayerStatusWorker.fetch.playerStatusList.FindIndex(player => player.playerName == playerName);
+                    PlayerStatusWorker.fetch.playerStatusList[psIdx].teamName = "";
+                }
             }
             else
             {

@@ -136,7 +136,7 @@ namespace DarkMultiPlayer
             }
             if (GUILayout.Button("Enumerate available techIDs", buttonStyle))
             {
-                ResearchWorker.enumerateRDTech();
+                //ResearchWorker.enumerateRDTech();
             }
 
             GUILayout.EndVertical();

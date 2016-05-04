@@ -41,7 +41,8 @@ namespace DarkMultiPlayerServer
                 string sql = "BEGIN;";
                 sql += "CREATE TABLE team (id integer PRIMARY KEY AUTOINCREMENT, name text, password text, funds real, reputation real, science real);";
                 sql += "CREATE TABLE team_members(id integer, name text, pubkey text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
-                sql += "CREATE TABLE team_research(id integer, rdtechname text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE); ";
+                sql += "CREATE TABLE team_research (id integer, techID  text, UNIQUE (id,techID) ON CONFLICT REPLACE, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
+                sql += "CREATE TABLE team_parts (id integer, partName  text, UNIQUE (id,partName) ON CONFLICT REPLACE, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
                 sql += "CREATE TRIGGER del_team_on_last_member AFTER DELETE on team_members BEGIN DELETE FROM team  WHERE team.id IN (SELECT team.id FROM team LEFT JOIN team_members ON team.id = team_members.id GROUP BY team.id HAVING COUNT(team_members.id) = 0);END; ";
                 sql += "COMMIT;";
                 executeQry(sql);
@@ -90,6 +91,7 @@ namespace DarkMultiPlayerServer
                 command.ExecuteNonQuery();
 
                 TeamStatus team = new TeamStatus();
+                team.teamID = rowid;
                 team.teamName = name;
                 team.funds = funds;
                 team.reputation = reputation;
@@ -246,8 +248,8 @@ namespace DarkMultiPlayerServer
         /// <returns></returns>
         private static TeamStatus parseTeamStatus(SQLiteDataReader reader)
         {
-            int teamid = reader.GetInt32(0);
             TeamStatus team = new TeamStatus();
+            team.teamID = reader.GetInt32(0);
             team.teamName = reader.GetString(1);
             team.funds = reader.GetDouble(2);
             team.reputation = reader.GetFloat(3);
@@ -255,7 +257,7 @@ namespace DarkMultiPlayerServer
 
             string sql = "SELECT name FROM team_members where id = @id";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-            command.Parameters.Add(new SQLiteParameter("@id", teamid));
+            command.Parameters.Add(new SQLiteParameter("@id", team.teamID));
             team.teamMembers = new List<MemberStatus>();
             SQLiteDataReader reader2 = command.ExecuteReader();
             while (reader2.Read())
@@ -290,6 +292,32 @@ namespace DarkMultiPlayerServer
                     reader.Read();
                     return reader.GetInt32(0);
                 } else
+                {
+                    // player is not in a team
+                    return -1;
+                }
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+                return -1;
+            }
+        }
+
+        public static int getTeamIdByTeamName(string name)
+        {
+            try
+            {
+                string sql = "SELECT id FROM team WHERE name  = @teamName";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@teamName", name));
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    return reader.GetInt32(0);
+                }
+                else
                 {
                     // player is not in a team
                     return -1;
@@ -347,6 +375,155 @@ namespace DarkMultiPlayerServer
                 int ret = command.ExecuteNonQuery();
                 DarkLog.Debug("DBManager: updated team science of team: " + teamName + " to science: " + science.ToString() + "rows changed: " + ret.ToString());
             } catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static void updateTeamFunds(string teamName, double funds)
+        {
+            try
+            {
+                string sql = "UPDATE team SET funds = @funds WHERE name = @teamName";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@funds", funds));
+                command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: updated team funds of team: " + teamName + " to funds: " + funds.ToString() + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static void updateTeamReputation(string teamName, float reputation)
+        {
+            try
+            {
+                string sql = "UPDATE team SET reputation = @reputation WHERE name = @teamName";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@reputation", reputation));
+                command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: updated team reputation of team: " + teamName + " to reputation: " + reputation.ToString() + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Adds new research to a team
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <param name="techID"></param>
+        public static void addResearchTech(string teamName, string techID)
+        {
+            try
+            {
+                string sql = "INSERT INTO team_research(id,techID) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@techID);";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+                command.Parameters.Add(new SQLiteParameter("@techID", techID));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: added research to team: " + teamName + " with techID: " + techID + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static void addResearchTech(int teamID, string techID)
+        {
+            try
+            {
+                string sql = "INSERT INTO team_research(id,techID) VALUES(@teamID,@techID);";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@teamID", teamID));
+                command.Parameters.Add(new SQLiteParameter("@techID", techID));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: added research to teamID: " + teamID + " with techID: " + techID + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Adds a purchased part to a team
+        /// </summary>
+        /// <param name="teamName"></param>
+        /// <param name="partName"></param>
+        public static void addPurchasedPart(string teamName, string partName)
+        {
+            try
+            {
+                string sql = "INSERT INTO team_parts(id,partName) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@partName);";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+                command.Parameters.Add(new SQLiteParameter("@partName", partName));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with partName: " + partName + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static void addPurchasedPart(int teamID, string partName)
+        {
+            try
+            {
+                string sql = "INSERT INTO team_parts(id,partName) VALUES(@teamID,@partName);";
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                command.Parameters.Add(new SQLiteParameter("@teamID", teamID));
+                command.Parameters.Add(new SQLiteParameter("@partName", partName));
+                int ret = command.ExecuteNonQuery();
+                DarkLog.Debug("DBManager: added purchasedPart to teamID: " + teamID + " with partName: " + partName + "rows changed: " + ret.ToString());
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static void setInitialTechState(string teamName, List<string> techIDs, List<string> parts)
+        {
+            try
+            {
+                int teamID = DBManager.getTeamIdByTeamName(teamName);
+                DarkLog.Debug("setInitialTechState: teamName: " + teamName + " techIDs.Count: " + techIDs.Count + " parts.Count: " + parts.Count);
+                using(SQLiteTransaction tr = m_dbConnection.BeginTransaction())
+                {
+                    using(SQLiteCommand cmd = m_dbConnection.CreateCommand())
+                    {
+                        cmd.Transaction = tr;
+                        foreach (string techID in techIDs)
+                        {
+                            cmd.CommandText = "INSERT INTO team_research (id,techID) VALUES(@teamID,@techID);";
+                            cmd.Parameters.Add(new SQLiteParameter("@teamID", teamID));
+                            cmd.Parameters.Add(new SQLiteParameter("@techID", techID));
+                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                        }
+                        foreach(string partName in parts)
+                        {
+                            cmd.CommandText = "INSERT INTO team_parts (id,partName) VALUES(@teamID,@partName);";
+                            cmd.Parameters.Add(new SQLiteParameter("@teamID", teamID));
+                            cmd.Parameters.Add(new SQLiteParameter("@partName", partName));
+                            cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                        }
+                        tr.Commit();
+                    }
+                }
+            }
+            catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);
             }
