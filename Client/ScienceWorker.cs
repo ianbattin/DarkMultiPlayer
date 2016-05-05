@@ -27,14 +27,14 @@ namespace DarkMultiPlayer
                 if (singleton != null)
                 {
                     singleton.workerEnabled = false;
-                    //GameEvents.OnScienceChanged.Remove(singleton.onScienceChanged);
-                    GameEvents.OnScienceRecieved.Remove(singleton.onScienceReceived);
+                    GameEvents.OnScienceChanged.Remove(singleton.onScienceChanged);
+                    //GameEvents.OnScienceRecieved.Remove(singleton.onScienceReceived);
                 }
                 singleton = new ScienceWorker();
                 DarkLog.Debug("ScienceWorker: loaded");
-                //GameEvents.OnScienceChanged.Add(singleton.onScienceChanged);
+                GameEvents.OnScienceChanged.Add(singleton.onScienceChanged);
                 // yes I can actually spell received
-                GameEvents.OnScienceRecieved.Add(singleton.onScienceReceived);
+                //GameEvents.OnScienceRecieved.Add(singleton.onScienceReceived);
             }
         }
 
@@ -58,8 +58,12 @@ namespace DarkMultiPlayer
         /// <param name="reasons">The reason why the science was changed</param>
         public void onScienceChanged(float science, TransactionReasons reasons)
         {
+            if (reasons == TransactionReasons.None)
+                return;
+            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+                return;
             Debug.Log("science has changed to value: " + science.ToString() + " with reason: " + reasons.ToString());
-            ScreenMessages.PostScreenMessage("science has changed to value: " + science.ToString() + " with reason: " + reasons.ToString(),1f,ScreenMessageStyle.UPPER_CENTER);
+            //ScreenMessages.PostScreenMessage("science has changed to value: " + science.ToString() + " with reason: " + reasons.ToString(),1f,ScreenMessageStyle.UPPER_CENTER);
 
             // send new science value via network
             using (MessageWriter mw = new MessageWriter())
@@ -83,7 +87,7 @@ namespace DarkMultiPlayer
                 int idx = TeamWorker.fetch.teams.FindIndex(team => team.teamName == teamName);
                 if (idx >= 0)
                 {
-                    TeamWorker.fetch.teams[idx].science += science;
+                    TeamWorker.fetch.teams[idx].science = science;
                 }   
             }
         }
@@ -94,8 +98,8 @@ namespace DarkMultiPlayer
         public void syncScienceWithTeam(float science)
         {
             DarkLog.Debug("syncing science with team to target science: " + science.ToString());
-            //float diff = science - ResearchAndDevelopment.Instance.Science;
-            ResearchAndDevelopment.Instance.AddScience(science, TransactionReasons.RnDs);
+            float diff = science - ResearchAndDevelopment.Instance.Science;
+            ResearchAndDevelopment.Instance.AddScience(diff, TransactionReasons.None);
         }
     }
 }

@@ -124,6 +124,19 @@ namespace DarkMultiPlayerServer.Messages
                     }
                     ClientHandler.SendToClient(client, tJoinResp, true);
                     sendTeamStatusJoin(client);
+
+                    ServerMessage tState = new ServerMessage();
+                    tState.type = ServerMessageType.RESEARCH_TECH_STATE;
+                    using (MessageWriter mw = new MessageWriter())
+                    {
+                        List<string> techIDs = DBManager.getTeamResearch(client.teamName);
+                        List<string> parts = DBManager.getTeamParts(client.teamName);
+                        DarkLog.Debug("HandleTeamJoinRequest: sending RESEARCH_TECH_STATE to: " + client.playerName + " with techIDs.Count: " + techIDs.Count + " and partNames: " + parts.Count);
+                        mw.Write<string[]>(techIDs.ToArray());
+                        mw.Write<string[]>(parts.ToArray());
+                        tState.data = mw.GetMessageBytes();
+                    }
+                    ClientHandler.SendToTeam(client, tState, true);
                 }
                 else
                 {

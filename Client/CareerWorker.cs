@@ -37,6 +37,8 @@ namespace DarkMultiPlayer
 
         public void onFundsChanged(double funds, TransactionReasons reasons)
         {
+            if (reasons == TransactionReasons.None)
+                return;
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
                 return;
             DarkLog.Debug("onFundsChanged: new funds is: " + funds.ToString());
@@ -49,6 +51,8 @@ namespace DarkMultiPlayer
 
         public void onReputationChanged(float reputation, TransactionReasons reasons)
         {
+            if (reasons == TransactionReasons.None)
+                return;
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
                 return;
             DarkLog.Debug("onReputationChanged: new reputation is: " + reputation.ToString());
@@ -96,6 +100,7 @@ namespace DarkMultiPlayer
         {
             DarkLog.Debug("Syncing reputation with team to target reputation: " + rep.ToString());
             float diff = rep - Reputation.Instance.reputation;
+            //Reputation.Instance.addReputation_discrete(diff, TransactionReasons.None);
             Reputation.Instance.AddReputation(rep, TransactionReasons.None);
         }
     }

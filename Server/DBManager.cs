@@ -497,6 +497,11 @@ namespace DarkMultiPlayerServer
             try
             {
                 int teamID = DBManager.getTeamIdByTeamName(teamName);
+                if (teamID < 0)
+                {
+                    DarkLog.Debug("DBManager.setInitialTechState: could not find teamName: " + teamName);
+                    return;
+                }
                 DarkLog.Debug("setInitialTechState: teamName: " + teamName + " techIDs.Count: " + techIDs.Count + " parts.Count: " + parts.Count);
                 using(SQLiteTransaction tr = m_dbConnection.BeginTransaction())
                 {
@@ -526,6 +531,76 @@ namespace DarkMultiPlayerServer
             catch (SQLiteException e)
             {
                 DarkLog.Debug(e.Message);
+            }
+        }
+
+        public static List<string> getTeamResearch(string teamName)
+        {
+            try
+            {
+                int teamID = DBManager.getTeamIdByTeamName(teamName);
+                if (teamID < 0)
+                {
+                    DarkLog.Debug("DBManager.getTeamResearch: could not find teamName: " + teamName);
+                    return null;
+                }
+                string sql = "SELECT techID FROM team_research WHERE id = @id;";
+                SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+                cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                List<string> techIDs = new List<string>();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        techIDs.Add(reader.GetString(0));
+                    }
+                } else
+                {
+                    DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+                    return null;
+                }
+                return techIDs;
+            } catch(SQLiteException e)
+            {
+                DarkLog.Debug("getTeamResearch: "+e.Message);
+                return null;
+            }
+        }
+
+        public static List<string> getTeamParts(string teamName)
+        {
+            try
+            {
+                int teamID = DBManager.getTeamIdByTeamName(teamName);
+                if (teamID < 0)
+                {
+                    DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+                    return null;
+                }
+                string sql = "SELECT partName FROM team_parts WHERE id = @id;";
+                SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+                cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                List<string> parts = new List<string>();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        parts.Add(reader.GetString(0));
+                    }
+                }
+                else
+                {
+                    DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+                    return null;
+                }
+                return parts;
+            }
+            catch (SQLiteException e)
+            {
+                DarkLog.Debug("getTeamResearch: " + e.Message);
+                return null;
             }
         }
 

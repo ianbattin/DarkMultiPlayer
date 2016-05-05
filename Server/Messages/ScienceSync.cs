@@ -19,7 +19,7 @@ namespace DarkMultiPlayerServer.Messages
                 {
                     float science = mr.Read<float>();
                     float newScience = (team.science + science);
-                    DBManager.updateTeamScience(client.teamName, newScience);
+                    DBManager.updateTeamScience(client.teamName, science);
 
                     ServerMessage message = new ServerMessage();
                     message.type = ServerMessageType.SCIENCE_SYNC;

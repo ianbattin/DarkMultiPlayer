@@ -90,6 +90,7 @@ namespace DarkMultiPlayer
                 parts = mr.Read<string[]>().ToList();
             }
             List<ProtoRDNode> nodes = AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>();
+            DarkLog.Debug("handleResearchTechState: found " + nodes.Count + " ProtoRDNodes");
             foreach(ProtoRDNode node in nodes)
             {
                 if (techIDs.Contains(node.tech.techID))
