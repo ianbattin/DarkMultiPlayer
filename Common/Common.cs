@@ -21,7 +21,7 @@ namespace DarkMultiPlayerCommon
         //Program version. This is written in the build scripts.
         public const string PROGRAM_VERSION = "Custom";
         //Mod control version - The last version to add parts
-        public const string MODCONTROL_VERSION = "1.0.5";
+        public const string MODCONTROL_VERSION = "1.1.0";
         //Compression threshold
         public const int COMPRESSION_THRESHOLD = 4096;
 
@@ -410,6 +410,12 @@ namespace DarkMultiPlayerCommon
             stockPartList.Add("RadialOreTank");
             stockPartList.Add("radPanelEdge");
             stockPartList.Add("mk3CargoRamp");
+			//1.1.0 parts
+			stockPartList.Add("InflatableHeatShield");
+			stockPartList.Add("HECS2.ProbeCore");
+			stockPartList.Add("HighGainAntenna");
+			stockPartList.Add("LgRadialSolarPanel");
+			stockPartList.Add("GearSmall");
             return stockPartList;
             //MAKE SURE TO CHANGE Common.MODCONTROL_VERSION
         }
