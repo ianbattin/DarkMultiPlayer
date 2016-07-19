@@ -22,6 +22,7 @@ namespace DarkMultiPlayer
         {
             myPlayerStatus = new PlayerStatus();
             myPlayerStatus.playerName = Settings.fetch.playerName;
+            myPlayerStatus.teamName = "";
             myPlayerStatus.statusText = "Syncing";
         }
 

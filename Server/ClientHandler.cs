@@ -647,6 +647,33 @@ namespace DarkMultiPlayerServer
                     case ClientMessageType.CONNECTION_END:
                         Messages.ConnectionEnd.HandleConnectionEnd(client, message.data);
                         break;
+                    case ClientMessageType.FUNDS_SYNC:
+                        Messages.CareerControl.handleFundsSync(client, message.data);
+                        break;
+                    case ClientMessageType.REPUTATION_SYNC:
+                        Messages.CareerControl.handleReputationSync(client, message.data);
+                        break;
+                    case ClientMessageType.SCIENCE_SYNC:
+                        Messages.ScienceSync.HandleScienceSync(client, message.data);
+                        break;
+                    case ClientMessageType.TEAM_CREATE_REQUEST:
+                        Messages.TeamControl.handleTeamCreateRequest(client, message.data);
+                        break;
+                    case ClientMessageType.TEAM_JOIN_REQUEST:
+                        Messages.TeamControl.handleTeamJoinRequest(client, message.data);
+                        break;
+                    case ClientMessageType.TEAM_LEAVE_REQUEST:
+                        Messages.TeamControl.handleTeamLeaveRequest(client, message.data);
+                        break;
+                    case ClientMessageType.RESEARCH_TECH_STATE:
+                        Messages.ResearchControl.handleResearchTechState(client, message.data);
+                        break;
+                    case ClientMessageType.RESEARCH_TECH_UNLOCKED:
+                        Messages.ResearchControl.handleResearchTechUnlocked(client, message.data);
+                        break;
+                    case ClientMessageType.RESEARCH_PART_PURCHASED:
+                        Messages.ResearchControl.handleResearchPartPurchased(client, message.data);
+                        break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         Messages.ConnectionEnd.SendConnectionEnd(client, "Unhandled message type " + message.type);
@@ -664,6 +691,23 @@ namespace DarkMultiPlayerServer
                 Messages.ConnectionEnd.SendConnectionEnd(client, "Server failed to process " + message.type + " message");
             }
             #endif
+        }
+
+        /// <summary>
+        /// Sends a ServerMessage to all TeamMembers of ourClient
+        /// </summary>
+        /// <param name="ourClient"></param>
+        /// <param name="message"></param>
+        /// <param name="highPriority"></param>
+        public static void SendToTeam(ClientObject ourClient, ServerMessage message, bool highPriority)
+        {
+            foreach(ClientObject otherClient in clients)
+            {
+                if(ourClient != otherClient && ourClient.teamName == otherClient.teamName)
+                {
+                    SendToClient(otherClient, message, highPriority);
+                }
+            }
         }
 
         //Call with null client to send to all clients. Also called from Dekessler and NukeKSC.
@@ -870,6 +914,7 @@ namespace DarkMultiPlayerServer
         public bool authenticated;
         public byte[] challange;
         public string playerName = "Unknown";
+        public string teamName = "";
         public string clientVersion;
         public bool isBanned;
         public IPAddress ipAddress;

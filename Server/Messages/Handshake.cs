@@ -156,6 +156,8 @@ namespace DarkMultiPlayerServer.Messages
             }
 
             client.playerName = playerName;
+            client.teamName = DBManager.getTeamNameByPlayerName(client.playerName);
+            DarkLog.Debug("HandShake: player is in team: " + client.teamName);
             client.publicKey = playerPublicKey;
             client.clientVersion = clientVersion;
 
@@ -238,6 +240,7 @@ namespace DarkMultiPlayerServer.Messages
                 mw.Write<string>(Common.PROGRAM_VERSION);
                 if (response == 0)
                 {
+                    mw.Write<string>(client.teamName);
                     mw.Write<bool>(Settings.settingsStore.compressionEnabled);
                     mw.Write<int>((int)Settings.settingsStore.modControl);
                     if (Settings.settingsStore.modControl != ModControlMode.DISABLED)

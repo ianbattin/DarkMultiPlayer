@@ -1,3 +1,4 @@
+using DarkMultiPlayerCommon;
 using System;
 using UnityEngine;
 
@@ -103,7 +104,7 @@ namespace DarkMultiPlayer
             }
             if (safeDisplay)
             {
-                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6711 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Options", windowStyle, layoutOptions));
+                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.OPTIONS_WINDOW + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Options", windowStyle, layoutOptions));
             }
             CheckWindowLock();
         }

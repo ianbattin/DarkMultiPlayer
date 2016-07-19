@@ -17,7 +17,7 @@ namespace DarkMultiPlayerCommon
         //Split messages into 8kb chunks to higher priority messages have more injection points into the TCP stream.
         public const int SPLIT_MESSAGE_LENGTH = 8192;
         //Bump this every time there is a network change (Basically, if MessageWriter or MessageReader is touched).
-        public const int PROTOCOL_VERSION = 39;
+        public const int PROTOCOL_VERSION = 41;
         //Program version. This is written in the build scripts.
         public const string PROGRAM_VERSION = "Custom";
         //Mod control version - The last version to add parts
@@ -527,7 +527,16 @@ namespace DarkMultiPlayerCommon
         LOCK_SYSTEM,
         MOD_DATA,
         SPLIT_MESSAGE,
-        CONNECTION_END
+        CONNECTION_END,
+        FUNDS_SYNC,
+        REPUTATION_SYNC,
+        SCIENCE_SYNC,
+        TEAM_CREATE_REQUEST,
+        TEAM_JOIN_REQUEST,
+        TEAM_LEAVE_REQUEST,
+        RESEARCH_TECH_STATE,
+        RESEARCH_TECH_UNLOCKED,
+        RESEARCH_PART_PURCHASED
     }
 
     public enum ServerMessageType
@@ -561,7 +570,17 @@ namespace DarkMultiPlayerCommon
         LOCK_SYSTEM,
         MOD_DATA,
         SPLIT_MESSAGE,
-        CONNECTION_END
+        CONNECTION_END,
+        FUNDS_SYNC,
+        REPUTATION_SYNC,
+        SCIENCE_SYNC,
+        TEAM_STATUS,
+        TEAM_CREATE_RESPONSE,
+        TEAM_JOIN_RESPONSE,
+        TEAM_LEAVE_RESPONSE,
+        RESEARCH_TECH_STATE,
+        RESEARCH_TECH_UNLOCKED,
+        RESEARCH_PART_PURCHASED
     }
 
     public enum ConnectionStatus
@@ -633,6 +652,14 @@ namespace DarkMultiPlayerCommon
         CHANGE_SUBSPACE,
         RELOCK_SUBSPACE,
         REPORT_RATE
+    }
+
+    public enum TeamMessageType
+    {
+        TEAM_JOIN,
+        TEAM_LEAVE,
+        TEAM_STATUS,
+        TEAM_LIST
     }
 
     public enum CraftMessageType
@@ -707,8 +734,39 @@ namespace DarkMultiPlayerCommon
     public class PlayerStatus
     {
         public string playerName;
+        public string teamName;
         public string vesselText;
         public string statusText;
+    }
+
+    public class MemberStatus
+    {
+        public string memberName;
+        public bool online;
+    }
+    public class TeamStatus
+    {
+        /// <summary>
+        /// Server only
+        /// </summary>
+        public int teamID;
+        public string teamName;
+        public List<MemberStatus> teamMembers = new List<MemberStatus>();
+        public double funds;
+        public float reputation;
+        public float science;
+    }
+
+    public class RDNodeStatus
+    {
+        public string techID;
+        public bool researched;
+
+        public RDNodeStatus(string techID, bool researched)
+        {
+            this.techID = techID;
+            this.researched = researched;
+        }
     }
 
     public class Subspace
@@ -724,6 +782,23 @@ namespace DarkMultiPlayerCommon
         public int rateIndex = 0;
         public long serverClock = 0;
         public double planetTime = 0;
+    }
+
+    public enum WindowId : int
+    {
+        MAIN_WINDOW = 6701,
+        CONNECTION_WINDOW = 6702,
+        PLAYER_STATUS_WINDOW = 6703,
+        CHAT_WINDOW = 6704,
+        DEBUG_WINDOW = 6705,
+        MOD_WINDOW = 6706,
+        CRAFT_PLAYER_WINDOW = 6707,
+        CRAFT_LIBRARY_WINDOW = 6708,
+        SCREENSHOT_WINDOW = 6710,
+        OPTIONS_WINDOW = 6711,
+        UNIVERSE_CONVERTER_WINDOW = 6712,
+        DISCLAIMER_WINDOW = 6713,
+        TEAM_WINDOW = 6714
     }
 
     public enum HandshakeReply : int

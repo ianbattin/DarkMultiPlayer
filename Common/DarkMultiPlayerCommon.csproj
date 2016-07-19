@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,4 +39,10 @@
     <Compile Include="Compression.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
+xcopy /Y "$(TargetPath)" "C:\Program Files\KSP\GameData\DarkMultiPlayer\Plugins"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Program Files\KSP\GameData\DarkMultiPlayer\Plugins"
+xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Program Files\KSP\GameData\DarkMultiPlayer\Plugins"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

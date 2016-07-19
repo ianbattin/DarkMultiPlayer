@@ -1,3 +1,4 @@
+using DarkMultiPlayerCommon;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,7 +78,7 @@ namespace DarkMultiPlayer
                     initialized = true;
                     InitGUI();
                 }
-                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window(6705 + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Debug", windowStyle, layoutOptions));
+                windowRect = DMPGuiUtil.PreventOffscreenWindow(GUILayout.Window((int)WindowId.DEBUG_WINDOW + Client.WINDOW_OFFSET, windowRect, DrawContent, "DarkMultiPlayer - Debug", windowStyle, layoutOptions));
             }
             CheckWindowLock();
         }
@@ -133,6 +134,11 @@ namespace DarkMultiPlayer
                     GUILayout.Label("Profiling statistics unavailable without a high resolution timer");
                 }
             }
+            if (GUILayout.Button("Enumerate available techIDs", buttonStyle))
+            {
+                //ResearchWorker.enumerateRDTech();
+            }
+
             GUILayout.EndVertical();
         }
 

@@ -2,6 +2,7 @@
 using System.IO;
 using MessageStream2;
 using DarkMultiPlayerCommon;
+using System.Text.RegularExpressions;
 
 namespace DarkMultiPlayerServer.Messages
 {
@@ -18,6 +19,42 @@ namespace DarkMultiPlayerServer.Messages
                 //Remove the .txt part for the name
                 scenarioNames[currentScenarioModule] = Path.GetFileNameWithoutExtension(file);
                 scenarioDataArray[currentScenarioModule] = File.ReadAllBytes(file);
+                if(client.teamName != "")
+                {
+                    // alter data!
+                    TeamStatus team = DBManager.getTeamStatus(client.teamName);
+                    if (team != null)
+                    {
+                        if (scenarioNames[currentScenarioModule].Equals("ResearchAndDevelopment"))
+                        {
+                            // alter the save file on the server for the new team data!
+                            string rdData = System.Text.Encoding.UTF8.GetString(scenarioDataArray[currentScenarioModule]);
+                            string pattern = @"(sci = )([0-9]*\.*[0-9]*)";
+                            Regex rgx = new Regex(pattern);
+                            rdData = rgx.Replace(rdData, "$1 " + team.science, 1);
+                            scenarioDataArray[currentScenarioModule] = System.Text.Encoding.UTF8.GetBytes(rdData);
+                        }
+                        if (scenarioNames[currentScenarioModule].Equals("Funding"))
+                        {
+                            // alter the save file on the server for the new team data!
+                            string rdData = System.Text.Encoding.UTF8.GetString(scenarioDataArray[currentScenarioModule]);
+                            string pattern = @"(funds = )([0-9]*\.*[0-9]*)";
+                            Regex rgx = new Regex(pattern);
+                            rdData = rgx.Replace(rdData, "$1 " + team.funds, 1);
+                            scenarioDataArray[currentScenarioModule] = System.Text.Encoding.UTF8.GetBytes(rdData);
+                        }
+                        if (scenarioNames[currentScenarioModule].Equals("Reputation"))
+                        {
+                            // alter the save file on the server for the new team data!
+                            string rdData = System.Text.Encoding.UTF8.GetString(scenarioDataArray[currentScenarioModule]);
+                            string pattern = @"(rep = )([0-9]*\.*[0-9]*)";
+                            Regex rgx = new Regex(pattern);
+                            rdData = rgx.Replace(rdData, "$1 " + team.reputation, 1);
+                            scenarioDataArray[currentScenarioModule] = System.Text.Encoding.UTF8.GetBytes(rdData);
+                        }
+                    }
+                }
+
                 currentScenarioModule++;
             }
             ServerMessage newMessage = new ServerMessage();

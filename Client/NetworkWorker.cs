@@ -154,6 +154,7 @@ namespace DarkMultiPlayer
                 VesselWorker.fetch.workerEnabled = true;
                 HackyInAtmoLoader.fetch.workerEnabled = true;
                 PlayerStatusWorker.fetch.workerEnabled = true;
+                TeamWorker.fetch.workerEnabled = true;
                 ScenarioWorker.fetch.workerEnabled = true;
                 DynamicTickWorker.fetch.workerEnabled = true;
                 WarpWorker.fetch.workerEnabled = true;
@@ -535,10 +536,10 @@ namespace DarkMultiPlayer
                                     Disconnect("Disconnected from pre-v0.2 DMP server");
                                     return;
                                 }
-                                if (messageType > (Enum.GetNames(typeof(ServerMessageType)).Length - 1))
+                                if (messageType >= (Enum.GetNames(typeof(ServerMessageType)).Length))
                                 {
                                     //Malformed message, most likely from a non DMP-server.
-                                    Disconnect("Disconnected from non-DMP server");
+                                    Disconnect("Disconnected from non-DMP server: received messageType "+messageType+" max allowed messageType is: "+ (Enum.GetNames(typeof(ServerMessageType)).Length));
                                     //Returning from ReceiveCallback will break the receive loop and stop processing any further messages.
                                     return;
                                 }
@@ -851,6 +852,36 @@ namespace DarkMultiPlayer
                     case ServerMessageType.CONNECTION_END:
                         HandleConnectionEnd(message.data);
                         break;
+                    case ServerMessageType.FUNDS_SYNC:
+                        CareerWorker.fetch.handleFundsChanged(message.data);
+                        break;
+                    case ServerMessageType.REPUTATION_SYNC:
+                        CareerWorker.fetch.handleReputationChanged(message.data);
+                        break;
+                    case ServerMessageType.SCIENCE_SYNC:
+                        ScienceWorker.fetch.handleScienceSyncMessage(message.data);
+                        break;
+                    case ServerMessageType.TEAM_STATUS:
+                        TeamWorker.fetch.HandleTeamMessage(message.data);
+                        break;
+                    case ServerMessageType.TEAM_CREATE_RESPONSE:
+                        TeamWorker.fetch.HandleTeamCreateResponse(message.data);
+                        break;
+                    case ServerMessageType.TEAM_JOIN_RESPONSE:
+                        TeamWorker.fetch.HandleTeamJoinResponse(message.data);
+                        break;
+                    case ServerMessageType.TEAM_LEAVE_RESPONSE:
+                        TeamWorker.fetch.HandleTeamLeaveResponse(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_TECH_STATE:
+                        ResearchWorker.fetch.handleResearchTechState(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_TECH_UNLOCKED:
+                        ResearchWorker.fetch.handleResearchTechUnlocked(message.data);
+                        break;
+                    case ServerMessageType.RESEARCH_PART_PURCHASED:
+                        ResearchWorker.fetch.handlePartPurchased(message.data);
+                        break;
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         break;
@@ -912,6 +943,7 @@ namespace DarkMultiPlayer
                     //If we handshook successfully, the mod data will be available to read.
                     if (reply == 0)
                     {
+                        PlayerStatusWorker.fetch.myPlayerStatus.teamName = mr.Read<string>();
                         Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;
                         ModWorker.fetch.modControl = (ModControlMode)mr.Read<int>();
                         if (ModWorker.fetch.modControl != ModControlMode.DISABLED)
@@ -1089,10 +1121,12 @@ namespace DarkMultiPlayer
             using (MessageReader mr = new MessageReader(messageData))
             {
                 string playerName = mr.Read<string>();
+                string teamName = mr.Read<string>();
                 string vesselText = mr.Read<string>();
                 string statusText = mr.Read<string>();
                 PlayerStatus newStatus = new PlayerStatus();
                 newStatus.playerName = playerName;
+                newStatus.teamName = teamName;
                 newStatus.vesselText = vesselText;
                 newStatus.statusText = statusText;
                 PlayerStatusWorker.fetch.AddPlayerStatus(newStatus);
@@ -1639,6 +1673,7 @@ namespace DarkMultiPlayer
             using (MessageWriter mw = new MessageWriter())
             {
                 mw.Write<string>(playerStatus.playerName);
+                mw.Write<string>(playerStatus.teamName);
                 mw.Write<string>(playerStatus.vesselText);
                 mw.Write<string>(playerStatus.statusText);
                 messageBytes = mw.GetMessageBytes();
@@ -1972,6 +2007,83 @@ namespace DarkMultiPlayer
         {
             ClientMessage newMessage = new ClientMessage();
             newMessage.type = ClientMessageType.LOCK_SYSTEM;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        // ScienceWorker
+        public void SendScienceSyncMessage(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.SCIENCE_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        // CareerWorker
+        public void SendFundsChangedMessage(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.FUNDS_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendReputationChangedMessage(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.REPUTATION_SYNC;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+
+        // TeamWorker
+        public void SendTeamCreateRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_CREATE_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendTeamJoinRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_JOIN_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendTeamLeaveRequest(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.TEAM_LEAVE_REQUEST;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        // Research
+        public void SendResearchTechState(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_TECH_STATE;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendResearchTechUnlocked(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_TECH_UNLOCKED;
+            newMessage.data = messageData;
+            QueueOutgoingMessage(newMessage, true);
+        }
+
+        public void SendPartPurchased(byte[] messageData)
+        {
+            ClientMessage newMessage = new ClientMessage();
+            newMessage.type = ClientMessageType.RESEARCH_PART_PURCHASED;
             newMessage.data = messageData;
             QueueOutgoingMessage(newMessage, true);
         }
