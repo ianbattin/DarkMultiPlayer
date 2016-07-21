@@ -118,19 +118,33 @@ namespace DarkMultiPlayer
         {
             using (MessageReader mr = new MessageReader(messageData))
             {
-                string techID = mr.Read<string>();
-                researchTech(techID);
-            }
+				string teamName = mr.Read<string>();
+				string techID = mr.Read<string>();
+				DarkLog.Debug("Received: RESEARCH_PART_UNLOCKED for part: " + techID);
+				List<string> newResearch = new List<string>();
+				newResearch.Add(techID);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					syncResearchWithTeam(newResearch);
+				researchTech(techID);
+				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).research.Add(techID);
+			}
         }
 
         public void handlePartPurchased(byte[] messageData)
         {
             using(MessageReader mr = new MessageReader(messageData))
             {
-                string partName = mr.Read<string>();
+				string teamName = mr.Read<string>();
+				string partName = mr.Read<string>();
                 DarkLog.Debug("Received: RESEARCH_PART_PURCHASED for part: " + partName);
-                purchasePart(partName);
-            }
+
+				List<string> newPurchase = new List<string>();
+				newPurchase.Add(partName);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					syncPurchasedWithTeam(newPurchase);
+				purchasePart(partName);
+				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).purchased.Add(partName);
+			}
         }
 
         // Helper functions
@@ -154,12 +168,27 @@ namespace DarkMultiPlayer
             ResearchAndDevelopment.Instance.SetTechState(techID, node);
         }
 
-        /// <summary>
-        /// Career mode only
-        /// Called when the user creates a team
-        /// </summary>
-        /// <returns>List of part names that have been purchased</returns>
-        public List<string> getPurchasedParts()
+		public void syncResearchWithTeam(List<string> research) 
+		{
+			foreach(String techID in research) {
+				DarkLog.Debug("Syncing research with team with partID: " + techID);
+				researchTech(techID);
+			}
+		}
+
+		public void syncPurchasedWithTeam(List<string> purchased) {
+			foreach (String partName in purchased) {
+				DarkLog.Debug("Syncing purchased with team with partName: " + partName);
+				purchasePart(partName);
+			}
+		}
+
+		/// <summary>
+		/// Career mode only
+		/// Called when the user creates a team
+		/// </summary>
+		/// <returns>List of part names that have been purchased</returns>
+		public List<string> getPurchasedParts()
         {
             List<string> parts = new List<string>();
             foreach (AvailablePart part in PartLoader.LoadedPartsList)
@@ -179,6 +208,7 @@ namespace DarkMultiPlayer
         public List<string> getAvailableTechIDs()
         {
             List<string> techList = new List<string>();
+			techList.Add("start");
             /*foreach (AvailablePart part in PartLoader.LoadedPartsList)
             {
                 ProtoTechNode tech = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);

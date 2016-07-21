@@ -62,7 +62,10 @@ namespace DarkMultiPlayer
                     mw.Write<double>(Funding.Instance.Funds);
                     mw.Write<float>(Reputation.Instance.reputation);
                     mw.Write<float>(ResearchAndDevelopment.Instance.Science);
-                } else if(HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
+					mw.Write<string[]>(ResearchWorker.fetch.getAvailableTechIDs().ToArray());
+					mw.Write<string[]>(ResearchWorker.fetch.getPurchasedParts().ToArray());
+					//mw.Write<RDNodeStatus>
+				} else if(HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
                     mw.Write<float>(ResearchAndDevelopment.Instance.Science);
                 }
 
@@ -116,28 +119,44 @@ namespace DarkMultiPlayer
                     DarkLog.Debug("Could not create team, error: " + error);
                     return;
                 }
-                // Created Team!
-                string teamName = mr.Read<string>();
-                DarkLog.Debug("Successfully created team!"+teamName);
+				DarkLog.Debug("Creating Team...");
 
+                // Created Team!
                 TeamStatus team = new TeamStatus();
-                team.teamName = teamName;
-                team.funds = mr.Read<double>();
+                team.teamName = mr.Read<string>();
+				team.funds = mr.Read<double>();
                 team.reputation = mr.Read<float>();
                 team.science = mr.Read<float>();
-                int memberCount = mr.Read<int>();
+				team.research = new List<string>(mr.Read<string[]>());
+				team.purchased = new List<string>(mr.Read<string[]>());
+
+				int memberCount = mr.Read<int>();
                 DarkLog.Debug("deserializing "+memberCount+" members");
                 team.teamMembers = new List<MemberStatus>();
-                for (int j = 0; j < memberCount; j++)
+
+				DarkLog.Debug("Successfully created team: " + team.teamName + " with Funds: " + team.funds + " Rep: " + team.reputation + 
+					" Science: " + team.science + " ResearchCount: " + team.research.Count + " PurchasedCount: " + team.purchased.Count);
+				string researchedString = "";
+				foreach(string s in team.research) {
+					researchedString += (s + ", ");
+				}
+				DarkLog.Debug("Team Research: " + researchedString);
+				string purchasedString = "";
+				foreach (string s in team.purchased) {
+					purchasedString += (s + ", ");
+				}
+				DarkLog.Debug("Team Purchased: " + purchasedString);
+
+				for (int j = 0; j < memberCount; j++)
                 {
                     MemberStatus member = new MemberStatus();
                     member.memberName = mr.Read<string>();
                     member.online = mr.Read<bool>();
                     team.teamMembers.Add(member);
                 }
-                HandleTeamStatus(teamName, team);
+                HandleTeamStatus(team.teamName, team);
 
-                PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
+                PlayerStatusWorker.fetch.myPlayerStatus.teamName = team.teamName;
                 ResearchWorker.fetch.sendInitialTechState();
             }
         }
@@ -148,52 +167,71 @@ namespace DarkMultiPlayer
         /// <param name="messageData"></param>
         public void HandleTeamJoinResponse(byte[] messageData)
         {
-            using (MessageReader mr = new MessageReader(messageData))
-            {
-                bool success = mr.Read<bool>();
-                if (!success)
-                {
-                    string error = mr.Read<string>();
-                    DarkLog.Debug("Could not join team, error: " + error);
-                    return;
-                }
-                DarkLog.Debug("Successfully joined team!");
-                // Joined Team!
-                string teamName = mr.Read<string>();
-                DarkLog.Debug("teamName is: " + teamName);
-                PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
-                //HandlePlayerJoin(teamName, PlayerStatusWorker.fetch.myPlayerStatus.playerName);
+			using (MessageReader mr = new MessageReader(messageData)) {
+				bool success = mr.Read<bool>();
+				if (!success) {
+					string error = mr.Read<string>();
+					DarkLog.Debug("Could not join team, error: " + error);
+					return;
+				}
+				DarkLog.Debug("Successfully joined team!");
+				// Joined Team!
+				string teamName = mr.Read<string>();
+				DarkLog.Debug("teamName is: " + teamName);
+				PlayerStatusWorker.fetch.myPlayerStatus.teamName = teamName;
+				//HandlePlayerJoin(teamName, PlayerStatusWorker.fetch.myPlayerStatus.playerName);
 
-                // Receive funds/reputation/science/research status
+				// Receive funds/reputation/science/research status
 
-                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
-                {
-                    //DarkLog.Debug("HandleTeamJoinResponse: ");
-                    double funds = mr.Read<double>();
-                    CareerWorker.fetch.syncFundsWithTeam(funds);
-                    float reputation = mr.Read<float>();
-                    CareerWorker.fetch.syncReputationWithTeam(reputation);
-                    float science = mr.Read<float>();
-                    ScienceWorker.fetch.syncScienceWithTeam(science);
-                }
-                else if (HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX)
-                {
-                    float science = mr.Read<float>();
-                    DarkLog.Debug("trying to sync science");
-                    ScienceWorker.fetch.syncScienceWithTeam(science);
-                }
-                
-                /*List<RDNodeStatus> RDStatus = new List<RDNodeStatus>();
-                int numRD = mr.Read<int>();
-                for(int i = 0; i<numRD; i++)
-                {
-                    string techID = mr.Read<string>();
-                    bool researched = mr.Read<bool>();
-                    RDStatus.Add(new RDNodeStatus(techID, researched));
+				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER) {
+					//DarkLog.Debug("HandleTeamJoinResponse: ");
+					DarkLog.Debug("trying to sync funds, rep, science");
+					double funds = mr.Read<double>();
+					CareerWorker.fetch.syncFundsWithTeam(funds);
+					float reputation = mr.Read<float>();
+					CareerWorker.fetch.syncReputationWithTeam(reputation);
+					float science = mr.Read<float>();
+					ScienceWorker.fetch.syncScienceWithTeam(science);
+					List<string> research = new List<string>(mr.Read<string[]>());
+					ResearchWorker.fetch.syncResearchWithTeam(research);
+					List<string> purchased = new List<string>(mr.Read<string[]>());
+					ResearchWorker.fetch.syncPurchasedWithTeam(purchased);
 
-                    // ResearchWorker set nodes accordingly
-                }*/
-            }
+					DarkLog.Debug("Joinging Team - Funds: " + funds + " | Rep: " + reputation + " | Science: " + science);
+					string researchString = "";
+					for(int i = 0; i < research.Count; i++) {
+						researchString += research[i] + ", ";
+					}
+					DarkLog.Debug("Joining Team - Research: " + researchString);
+					string purchasedString = "";
+					for (int i = 0; i < purchased.Count; i++) {
+						purchasedString += purchased[i] + ", ";
+					}
+					DarkLog.Debug("Joining Team - Purchased: " + purchasedString);
+
+				}
+				else if (HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
+					float science = mr.Read<float>();
+					DarkLog.Debug("trying to sync science");
+					ScienceWorker.fetch.syncScienceWithTeam(science);
+				}
+
+				/*
+				//THIS WAS COMMENTED OUT - CRASHES THE GAME
+				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER) {
+					DarkLog.Debug("trying to sync research");
+					List<RDNodeStatus> RDStatus = new List<RDNodeStatus>();
+					int numRD = mr.Read<int>();
+					DarkLog.Debug("" + numRD);
+					for (int i = 0; i < numRD; i++) {
+						string techID = mr.Read<string>();
+						bool researched = mr.Read<bool>();
+						RDStatus.Add(new RDNodeStatus(techID, researched));
+						DarkLog.Debug("" + techID + " | " + researched);
+						// ResearchWorker set nodes accordingly
+					}
+				}*/
+			}
         }
 
         /// <summary>
@@ -252,7 +290,9 @@ namespace DarkMultiPlayer
                             team.funds = mr.Read<double>();
                             team.reputation = mr.Read<float>();
                             team.science = mr.Read<float>();
-                            int memberCount = mr.Read<int>();
+							team.research = new List<string>(mr.Read<string[]>());
+							team.purchased = new List<string>(mr.Read<string[]>());
+							int memberCount = mr.Read<int>();
                             DarkLog.Debug("deserializing members");
                             team.teamMembers = new List<MemberStatus>();
                             for (int j = 0; j < memberCount; j++)
@@ -279,8 +319,10 @@ namespace DarkMultiPlayer
                                     team.funds = mr.Read<double>();
                                     team.reputation = mr.Read<float>();
                                     team.science = mr.Read<float>();
+									team.research = new List<string>(mr.Read<string[]>());
+									team.purchased = new List<string>(mr.Read<string[]>());
 
-                                    int memberCount = mr.Read<int>();
+									int memberCount = mr.Read<int>();
                                     DarkLog.Debug("TEAM_STATUS: memberCount is " + memberCount.ToString());
                                     team.teamMembers = new List<MemberStatus>();
                                     for (int j = 0; j < memberCount; j++)

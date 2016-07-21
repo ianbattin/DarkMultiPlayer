@@ -761,7 +761,9 @@ namespace DarkMultiPlayerCommon
         public double funds;
         public float reputation;
         public float science;
-    }
+		public List<string> research = new List<string>();
+		public List<string> purchased = new List<string>();
+	}
 
     public class RDNodeStatus
     {

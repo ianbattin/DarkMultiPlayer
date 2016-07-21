@@ -26,6 +26,8 @@ namespace DarkMultiPlayerServer.Messages
                 double funds = 0d;
                 float reputation = 0f;
                 float science = 0f;
+				List<string> research = new List<string>();
+				List<string> purchased = new List<string>();
                 switch (Settings.settingsStore.gameMode)
                 {
                     case GameMode.CAREER:
@@ -33,6 +35,8 @@ namespace DarkMultiPlayerServer.Messages
                             funds = mr.Read<double>();
                             reputation = mr.Read<float>();
                             science = mr.Read<float>();
+							research = new List<string>(mr.Read<string[]>());
+							purchased = new List<string>(mr.Read<string[]>());
                         }
                         break;
                     case GameMode.SCIENCE:
@@ -42,7 +46,7 @@ namespace DarkMultiPlayerServer.Messages
                         break;
                 }
 
-                TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, client.playerName, client.publicKey);
+                TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, research, purchased, client.playerName, client.publicKey);
                 teams.Add(team);
 
                 // now send new info and responses!
@@ -60,6 +64,8 @@ namespace DarkMultiPlayerServer.Messages
                         mw.Write<double>(team.funds);
                         mw.Write<float>(team.reputation);
                         mw.Write<float>(team.science);
+						mw.Write<string[]>(team.research.ToArray());
+						mw.Write<string[]>(team.purchased.ToArray());
                         mw.Write<int>(team.teamMembers.Count);
                         DarkLog.Debug("handleTeamCreateRequest: sending " + team.teamMembers.Count + " teamMembers");
                         foreach(MemberStatus member in team.teamMembers)
@@ -108,6 +114,8 @@ namespace DarkMultiPlayerServer.Messages
                                         mw.Write<double>(team.funds);
                                         mw.Write<float>(team.reputation);
                                         mw.Write<float>(team.science);
+										mw.Write<string[]>(team.research.ToArray());
+										mw.Write<string[]>(team.purchased.ToArray());
                                     }
                                     break;
                                 case GameMode.SCIENCE:
@@ -210,9 +218,11 @@ namespace DarkMultiPlayerServer.Messages
                 mw.Write<double>(team.funds);
                 mw.Write<float>(team.reputation);
                 mw.Write<float>(team.science);
+				mw.Write<string[]>(team.research.ToArray());
+				mw.Write<string[]>(team.purchased.ToArray());
 
-                // serialize member list
-                mw.Write<int>(team.teamMembers.Count);
+				// serialize member list
+				mw.Write<int>(team.teamMembers.Count);
                 foreach(MemberStatus member in team.teamMembers)
                 {
                     mw.Write<string>(member.memberName);
@@ -241,8 +251,10 @@ namespace DarkMultiPlayerServer.Messages
                     mw.Write<double>(team.funds);
                     mw.Write<float>(team.reputation);
                     mw.Write<float>(team.science);
+					mw.Write<string[]>(team.research.ToArray());
+					mw.Write<string[]>(team.purchased.ToArray());
 
-                    mw.Write<int>(team.teamMembers.Count);
+					mw.Write<int>(team.teamMembers.Count);
                     foreach(MemberStatus member in team.teamMembers)
                     {
                         mw.Write<string>(member.memberName);

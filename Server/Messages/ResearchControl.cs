@@ -26,7 +26,8 @@ namespace DarkMultiPlayerServer.Messages
                 message.type = ServerMessageType.RESEARCH_TECH_UNLOCKED;
                 using (MessageWriter mw = new MessageWriter())
                 {
-                    mw.Write<string>(techID);
+					mw.Write<string>(client.teamName);
+					mw.Write<string>(techID);
                     message.data = mw.GetMessageBytes();
                 }
                 ClientHandler.SendToTeam(client, message, true);
@@ -45,7 +46,8 @@ namespace DarkMultiPlayerServer.Messages
                 message.type = ServerMessageType.RESEARCH_PART_PURCHASED;
                 using (MessageWriter mw = new MessageWriter())
                 {
-                    mw.Write<string>(partName);
+					mw.Write<string>(client.teamName);
+					mw.Write<string>(partName);
                     message.data = mw.GetMessageBytes();
                 }
                 ClientHandler.SendToTeam(client, message, true);
