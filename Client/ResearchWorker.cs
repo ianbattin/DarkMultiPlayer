@@ -125,7 +125,8 @@ namespace DarkMultiPlayer
 				newResearch.Add(techID);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					syncResearchWithTeam(newResearch);
-				researchTech(techID);
+				else
+					researchTech(techID);
 				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).research.Add(techID);
 			}
         }
@@ -142,7 +143,8 @@ namespace DarkMultiPlayer
 				newPurchase.Add(partName);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					syncPurchasedWithTeam(newPurchase);
-				purchasePart(partName);
+				else
+					purchasePart(partName);
 				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).purchased.Add(partName);
 			}
         }
@@ -151,33 +153,34 @@ namespace DarkMultiPlayer
 
         public void purchasePart(string partName)
         {
-            AvailablePart part = PartLoader.getPartInfoByName(partName);
-            ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
-            if (!node.partsPurchased.Contains(part))
-            {
-                DarkLog.Debug("purchasePart: adding part: " + partName + " to techID: " + part.TechRequired);
-                node.partsPurchased.Add(part);
-                ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
-            }
+			AvailablePart part = PartLoader.getPartInfoByName(partName);
+			ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
+			if (!node.partsPurchased.Contains(part)) {
+				node.partsPurchased.Add(part);
+				ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
+			}
         }
 
-        public void researchTech(string techID)
-        {
-            ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(techID);
-            node.state = RDTech.State.Available;
-            ResearchAndDevelopment.Instance.SetTechState(techID, node);
-        }
+		public void researchTech(string techID) {
+			ProtoRDNode node = new ProtoRDNode();
+			node = node.FindNodeByID(techID, AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>());
+			if (node.tech.state != RDTech.State.Available) { 
+				node.tech.state = RDTech.State.Available;
+				ResearchAndDevelopment.Instance.SetTechState(node.tech.techID, node.tech);
+				DarkLog.Debug("Tech state for: " + techID + " = " + ResearchAndDevelopment.Instance.GetTechState(node.tech.techID) + "   |  node.tech.state");
+			}
+		}
 
 		public void syncResearchWithTeam(List<string> research) 
 		{
-			foreach(String techID in research) {
+			foreach(string techID in research) {
 				DarkLog.Debug("Syncing research with team with partID: " + techID);
 				researchTech(techID);
 			}
 		}
 
 		public void syncPurchasedWithTeam(List<string> purchased) {
-			foreach (String partName in purchased) {
+			foreach (string partName in purchased) {
 				DarkLog.Debug("Syncing purchased with team with partName: " + partName);
 				purchasePart(partName);
 			}
@@ -208,18 +211,21 @@ namespace DarkMultiPlayer
         public List<string> getAvailableTechIDs()
         {
             List<string> techList = new List<string>();
-			techList.Add("start");
-            /*foreach (AvailablePart part in PartLoader.LoadedPartsList)
+			/*foreach (AvailablePart part in PartLoader.LoadedPartsList)
             {
                 ProtoTechNode tech = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
-                if (tech.state == RDTech.State.Available && !techList.Contains(tech.techID))
+                if (tech.state == RDTech.State.Available)
                     techList.Add(tech.techID);
             }*/
 
-            List<ProtoRDNode> nodes = AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>().FindAll(node => node.tech.state == RDTech.State.Available);
+			ProtoRDNode newNode = new ProtoRDNode();
+			List<ProtoRDNode> nodes = AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>();
             foreach(ProtoRDNode node in nodes)
             {
-                techList.Add(node.tech.techID);
+				newNode = node;
+				DarkLog.Debug("Tech: " + newNode.tech.techID + " | " + newNode.tech.state);
+				if(node.tech.state == RDTech.State.Available)
+					techList.Add(node.tech.techID);
             }
             return techList;
         }

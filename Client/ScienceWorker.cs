@@ -75,21 +75,14 @@ namespace DarkMultiPlayer
 
         public void handleScienceSyncMessage(byte[] messageData)
         {
-            DarkLog.Debug("handleScienceSyncMessage: received new science sync");
             using(MessageReader mr = new MessageReader(messageData))
             {
                 string teamName = mr.Read<string>();
                 float science = mr.Read<float>();
-                DarkLog.Debug("handleScienceSyncMessage: teamName is: " + teamName);
                 if(teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
                     syncScienceWithTeam(science);
-
-                int idx = TeamWorker.fetch.teams.FindIndex(team => team.teamName == teamName);
-                if (idx >= 0)
-                {
-                    TeamWorker.fetch.teams[idx].science = science;
-                }   
-            }
+				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).science = science;
+			}
         }
         /// <summary>
         /// Sets the players science value to the value of the parameter

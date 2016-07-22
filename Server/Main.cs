@@ -64,8 +64,9 @@ namespace DarkMultiPlayerServer
 
                 // Initialize DBManager
                 DBManager.Init();
+				Messages.TeamControl.updateTeams(DBManager.getTeamStatusList());
 
-                string oldSettingsFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DMPServerSettings.txt");
+			string oldSettingsFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DMPServerSettings.txt");
                 string newSettingsFile = Path.Combine(Server.configDirectory, "Settings.txt");
                 string oldGameplayFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DMPGameplaySettings.txt");
                 string newGameplayFile = Path.Combine(Server.configDirectory, "GameplaySettings.txt");

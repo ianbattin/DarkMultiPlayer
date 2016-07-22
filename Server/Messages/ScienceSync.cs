@@ -11,27 +11,23 @@ namespace DarkMultiPlayerServer.Messages
     {
         public static void HandleScienceSync(ClientObject client, byte[] messageData)
         {
-            DarkLog.Debug("HandleScienceSync: received new Science");
-            if (client.teamName != "")
+			if (client.teamName == "")
+				return;
+            using (MessageReader mr = new MessageReader(messageData))
             {
-                TeamStatus team = DBManager.getTeamStatus(client.teamName);
-                using (MessageReader mr = new MessageReader(messageData))
+                float science = mr.Read<float>();
+				DarkLog.Normal("Updating team " + client.teamName + " science to: " + science);
+
+				DBManager.updateTeamScience(client.teamName, science);
+                ServerMessage message = new ServerMessage();
+                message.type = ServerMessageType.SCIENCE_SYNC;
+                using (MessageWriter mw = new MessageWriter())
                 {
-                    float science = mr.Read<float>();
-                    float newScience = (team.science + science);
-                    DBManager.updateTeamScience(client.teamName, science);
-
-                    ServerMessage message = new ServerMessage();
-                    message.type = ServerMessageType.SCIENCE_SYNC;
-                    using (MessageWriter mw = new MessageWriter())
-                    {
-                        mw.Write<string>(client.teamName);
-                        mw.Write<float>(science);
-                        message.data = mw.GetMessageBytes();
-                    }
-                    ClientHandler.SendToAll(client, message, true);
+                    mw.Write<string>(client.teamName);
+                    mw.Write<float>(science);
+                    message.data = mw.GetMessageBytes();
                 }
-
+                ClientHandler.SendToAll(client, message, true);
             }
         }
     }

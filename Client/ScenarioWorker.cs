@@ -15,7 +15,7 @@ namespace DarkMultiPlayer
         private Queue<ScenarioEntry> scenarioQueue = new Queue<ScenarioEntry>();
         private bool blockScenarioDataSends = false;
         private float lastScenarioSendTime = 0f;
-        private const float SEND_SCENARIO_DATA_INTERVAL = 30f;
+        private const float SEND_SCENARIO_DATA_INTERVAL = 5f;
         //ScenarioType list to check.
         private Dictionary<string, Type> allScenarioTypesInAssemblies;
         //System.Reflection hackiness for loading kerbals into the crew roster:

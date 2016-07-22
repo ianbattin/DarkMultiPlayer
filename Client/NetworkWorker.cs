@@ -9,6 +9,8 @@ using System.Threading;
 using UnityEngine;
 using DarkMultiPlayerCommon;
 using MessageStream2;
+using System.Linq;
+using System.Text;
 
 namespace DarkMultiPlayer
 {
@@ -166,7 +168,7 @@ namespace DarkMultiPlayer
             if (displayMotd && (HighLogic.LoadedScene != GameScenes.LOADING) && (Time.timeSinceLevelLoad > 2f))
             {
                 displayMotd = false;
-                ScenarioWorker.fetch.UpgradeTheAstronautComplexSoTheGameDoesntBugOut();
+                //ScenarioWorker.fetch.UpgradeTheAstronautComplexSoTheGameDoesntBugOut();
                 ScreenMessages.PostScreenMessage(serverMotd, 10f, ScreenMessageStyle.UPPER_CENTER);
                 //Control locks will bug out the space centre sceen, so remove them before starting.
                 DeleteAllTheControlLocksSoTheSpaceCentreBugGoesAway();
@@ -935,7 +937,8 @@ namespace DarkMultiPlayer
                     {
                         serverProtocolVersion = mr.Read<int>();
                         serverVersion = mr.Read<string>();
-                    }
+						DarkLog.Debug("Protocol/version worked");
+					}
                     catch
                     {
                         //We don't care about this throw on pre-protocol-9 servers.
@@ -944,7 +947,17 @@ namespace DarkMultiPlayer
                     if (reply == 0)
                     {
                         PlayerStatusWorker.fetch.myPlayerStatus.teamName = mr.Read<string>();
-                        Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;
+						DarkLog.Debug("Recieving data for: " + PlayerStatusWorker.fetch.myPlayerStatus.teamName);
+						if(PlayerStatusWorker.fetch.myPlayerStatus.teamName != "") {
+							DarkLog.Debug("receiving team data");
+							CareerWorker.fetch.syncFundsWithTeam(mr.Read<double>());
+							CareerWorker.fetch.syncReputationWithTeam(mr.Read<float>());
+							ScienceWorker.fetch.syncScienceWithTeam(mr.Read<float>());
+							ResearchWorker.fetch.syncResearchWithTeam(mr.Read<string[]>().ToList());
+							ResearchWorker.fetch.syncPurchasedWithTeam(mr.Read<string[]>().ToList());
+						}
+						DarkLog.Debug("team stuff worked");
+						Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;
                         ModWorker.fetch.modControl = (ModControlMode)mr.Read<int>();
                         if (ModWorker.fetch.modControl != ModControlMode.DISABLED)
                         {

@@ -69,12 +69,14 @@ namespace DarkMultiPlayerServer
         {
             try {
                 string sql = "BEGIN;";
-                sql += "INSERT INTO team (name, password, funds) VALUES (@name,@password,@funds);";
+                sql += "INSERT INTO team (name, password, funds, reputation, science) VALUES (@name,@password,@funds,@reputation,@science);";
                 sql += "SELECT last_insert_rowid()";
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
                 command.Parameters.Add(new SQLiteParameter("@name", name));
                 command.Parameters.Add(new SQLiteParameter("@password", password));
                 command.Parameters.Add(new SQLiteParameter("@funds", funds));
+				command.Parameters.Add(new SQLiteParameter("@reputation", reputation));
+				command.Parameters.Add(new SQLiteParameter("@science", science));
 				SQLiteDataReader reader = command.ExecuteReader();
                 reader.Read();
                 int rowid = reader.GetInt32(0);
@@ -252,6 +254,8 @@ namespace DarkMultiPlayerServer
             team.teamID = reader.GetInt32(0);
             team.teamName = reader.GetString(1);
             team.funds = reader.GetDouble(2);
+			team.reputation = reader.GetFloat(3);
+			team.science = reader.GetFloat(4);
 			team.research = getTeamResearch(team.teamName);
 			team.purchased = getTeamParts(team.teamName);
 

@@ -612,6 +612,7 @@ namespace DarkMultiPlayerCommon
         TIME_LOCKING,
         TIME_LOCKED,
         STARTING,
+		TEAM_SYNCING,
         RUNNING,
         DISCONNECTING
     }

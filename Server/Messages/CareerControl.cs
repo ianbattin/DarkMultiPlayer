@@ -36,7 +36,9 @@ namespace DarkMultiPlayerServer.Messages
             using (MessageReader mr = new MessageReader(messageData))
             {
                 float reputation = mr.Read<float>();
-                DBManager.updateTeamReputation(client.teamName, reputation);
+				DarkLog.Normal("Updating team " + client.teamName + " rep to: " + reputation);
+
+				DBManager.updateTeamReputation(client.teamName, reputation);
                 ServerMessage message = new ServerMessage();
                 message.type = ServerMessageType.REPUTATION_SYNC;
                 using (MessageWriter mw = new MessageWriter())

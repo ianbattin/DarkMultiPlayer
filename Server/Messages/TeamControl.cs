@@ -265,5 +265,10 @@ namespace DarkMultiPlayerServer.Messages
             }
             ClientHandler.SendToClient(client, message, true);
         }
+
+		public static void updateTeams(List<TeamStatus> teamsList) {
+			foreach (TeamStatus team in teamsList)
+				teams.Add(team); 
+		}
     }
 }

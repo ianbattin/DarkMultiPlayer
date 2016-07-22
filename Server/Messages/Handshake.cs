@@ -241,6 +241,18 @@ namespace DarkMultiPlayerServer.Messages
                 if (response == 0)
                 {
                     mw.Write<string>(client.teamName);
+					DarkLog.Normal("Sending data for team: " + client.teamName);
+					TeamStatus team = TeamControl.teams.Find(TeamControl => TeamControl.teamName == client.teamName);
+					
+					if(team != null) {
+						DarkLog.Normal("Sending team data");
+						mw.Write<double>(team.funds);
+						mw.Write<float>(team.reputation);
+						mw.Write<float>(team.science);
+						mw.Write<string[]>(team.research.ToArray());
+						mw.Write<string[]>(team.purchased.ToArray());
+					}
+					
                     mw.Write<bool>(Settings.settingsStore.compressionEnabled);
                     mw.Write<int>((int)Settings.settingsStore.modControl);
                     if (Settings.settingsStore.modControl != ModControlMode.DISABLED)
