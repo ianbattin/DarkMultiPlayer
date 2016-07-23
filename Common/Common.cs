@@ -549,7 +549,8 @@ namespace DarkMultiPlayerCommon
 		CONTRACT_DECLINED,
 		CONTRACT_FAILED,
 		CONTRACT_FINISHED,
-		CONTRACT_OFFERED
+		CONTRACT_OFFERED,
+		CONTRACT_STATE
 	}
 
     public enum ServerMessageType

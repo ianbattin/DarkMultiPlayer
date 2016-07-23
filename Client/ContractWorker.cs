@@ -119,6 +119,8 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for accepted contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[0].Add(contractTitle);
+
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -131,6 +133,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[1].Add(contractTitle);
 
 				teamStatus.contracts[0].Remove(contractTitle);
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -143,6 +146,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[2].Add(contractTitle);
 
 				teamStatus.contracts[0].Remove(contractTitle);
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -153,6 +157,9 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for declined contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[3].Add(contractTitle);
+
+				teamStatus.contracts[0].Remove(contractTitle);
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -165,6 +172,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[4].Add(contractTitle);
 
 				teamStatus.contracts[0].Remove(contractTitle);
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -177,6 +185,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[5].Add(contractTitle);
 
 				teamStatus.contracts[0].Remove(contractTitle);
+				teamStatus.contracts[6].Remove(contractTitle);
 			}
 		}
 
@@ -230,6 +239,27 @@ namespace DarkMultiPlayer {
 					
 				}
 			}
+		}
+
+		public void SendInitialContractState() {
+			using (MessageWriter mw = new MessageWriter()) {
+				foreach(List<string> contractList in getContractState()) {
+					mw.Write<string[]>(contractList.ToArray());
+				}
+				NetworkWorker.fetch.SendContractState(mw.GetMessageBytes());
+			}
+		}
+
+		public List<List<string>> getContractState() {
+			List<List<string>> contracts = new List<List<string>>();
+			contracts.Add(getContractsOfType("ACCEPTED"));
+			contracts.Add(getContractsOfType("CANCELLED"));
+			contracts.Add(getContractsOfType("COMPLETED"));
+			contracts.Add(getContractsOfType("DECLINED"));
+			contracts.Add(getContractsOfType("FAILED"));
+			contracts.Add(getContractsOfType("FINISHED"));
+			contracts.Add(getContractsOfType("OFFERED"));
+			return contracts;
 		}
 
 		public List<string> getContractsOfType(string type) {

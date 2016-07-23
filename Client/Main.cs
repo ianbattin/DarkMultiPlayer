@@ -113,6 +113,7 @@ namespace DarkMultiPlayer
                 resetEvent.Add(ScienceWorker.Reset);
                 resetEvent.Add(CareerWorker.Reset);
                 resetEvent.Add(ResearchWorker.Reset);
+				resetEvent.Add(ContractWorker.Reset);
 
                 GameEvents.onHideUI.Add(() =>
                 {

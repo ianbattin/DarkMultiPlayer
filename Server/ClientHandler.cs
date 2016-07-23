@@ -695,6 +695,9 @@ namespace DarkMultiPlayerServer
 					case ClientMessageType.CONTRACT_OFFERED:
                         Messages.ContractControl.handleContractOfferedMessage(client, message.data);
                         break;
+					case ClientMessageType.CONTRACT_STATE:
+						Messages.ContractControl.handleContractState(client, message.data);
+						break;
 
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);

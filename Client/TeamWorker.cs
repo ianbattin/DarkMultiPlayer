@@ -161,6 +161,13 @@ namespace DarkMultiPlayer
 					purchasedString += (s + ", ");
 				}
 				DarkLog.Debug("Team Purchased: " + purchasedString);
+				string contractsString = "";
+				foreach (List<string> list in team.contracts) {
+					foreach(string s in list) {
+						contractsString += (s + ", ");
+					}
+				}
+				DarkLog.Debug("Team Contracts: " + contractsString);
 
 				for (int j = 0; j < memberCount; j++)
                 {
@@ -173,6 +180,7 @@ namespace DarkMultiPlayer
 
                 PlayerStatusWorker.fetch.myPlayerStatus.teamName = team.teamName;
                 ResearchWorker.fetch.sendInitialTechState();
+				ContractWorker.fetch.SendInitialContractState();
             }
         }
 

@@ -2173,6 +2173,13 @@ namespace DarkMultiPlayer
 			QueueOutgoingMessage(newMessage, true);
 		}
 
+		public void SendContractState(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_STATE;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
 
 		/// <summary>
 		/// If you are a mod, call DMPModInterface.fetch.SendModMessage.

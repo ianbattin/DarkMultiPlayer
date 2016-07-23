@@ -125,5 +125,26 @@ namespace DarkMultiPlayerServer.Messages {
 				ClientHandler.SendToAll(client, message, true);
 			}
 		}
+
+		/// <summary>
+		/// Client sends this after TeamCreateResponse has been received(client side) with success=true
+		/// </summary>
+		/// <param name="client"></param>
+		/// <param name="messageData"></param>
+		public static void handleContractState(ClientObject client, byte[] messageData) {
+			if (client.teamName == "")
+				return;
+			using (MessageReader mr = new MessageReader(messageData)) {
+				List<List<string>> contracts = new List<List<string>>();
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				contracts.Add(mr.Read<string[]>().ToList());
+				DBManager.setInitialContractState(client.teamName, contracts);
+			}
+		}
 	}
 }
