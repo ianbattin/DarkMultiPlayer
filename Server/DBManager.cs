@@ -781,7 +781,7 @@ namespace DarkMultiPlayerServer
                 if (teamID < 0)
                 {
                     DarkLog.Debug("DBManager.getTeamResearch: could not find teamName: " + teamName);
-                    return null;
+                    return new List<string>();
                 }
                 string sql = "SELECT techID FROM team_research WHERE id = @id;";
                 SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
@@ -797,13 +797,13 @@ namespace DarkMultiPlayerServer
                 } else
                 {
                     DarkLog.Debug("Team: " + teamName + " does not have any research available!");
-                    return null;
+                    return new List<string>();
                 }
                 return techIDs;
             } catch(SQLiteException e)
             {
                 DarkLog.Debug("getTeamResearch: "+e.Message);
-                return null;
+                return new List<string>();
             }
         }
 
@@ -815,7 +815,7 @@ namespace DarkMultiPlayerServer
                 if (teamID < 0)
                 {
                     DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
-                    return null;
+                    return new List<string>();
                 }
                 string sql = "SELECT partName FROM team_parts WHERE id = @id;";
                 SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
@@ -832,14 +832,14 @@ namespace DarkMultiPlayerServer
                 else
                 {
                     DarkLog.Debug("Team: " + teamName + " does not have any research available!");
-                    return null;
+                    return new List<string>();
                 }
                 return parts;
             }
             catch (SQLiteException e)
             {
                 DarkLog.Debug("getTeamResearch: " + e.Message);
-                return null;
+                return new List<string>();
             }
         }
 
@@ -848,7 +848,7 @@ namespace DarkMultiPlayerServer
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
 					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
-					return null;
+					return new List<List<string>>();
 				}
 				List<List<string>> contracts = new List<List<string>>();
 				contracts.Add(getTeamAcceptedContracts(teamName));
@@ -863,7 +863,7 @@ namespace DarkMultiPlayerServer
 			}
 			catch (SQLiteException e) {
 				DarkLog.Debug("getTeamResearch: " + e.Message);
-				return null;
+				return new List<List<string>>(); ;
 			}
 		}
 

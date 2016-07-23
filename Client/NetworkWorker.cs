@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Threading;
 using UnityEngine;
 using DarkMultiPlayerCommon;
 using MessageStream2;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks.Task;
 
-namespace DarkMultiPlayer
-{
-    public class NetworkWorker
+namespace DarkMultiPlayer {
+	public class NetworkWorker
     {
         //Read from ConnectionWindow
         public ClientState state
@@ -976,6 +974,17 @@ namespace DarkMultiPlayer
 							ScienceWorker.fetch.syncScienceWithTeam(mr.Read<float>());
 							ResearchWorker.fetch.syncResearchWithTeam(mr.Read<string[]>().ToList());
 							ResearchWorker.fetch.syncPurchasedWithTeam(mr.Read<string[]>().ToList());
+
+							//Getting all contract types
+							List<List<string>> contracts = new List<List<string>>();
+							for (int i = 0; i < 7; i++) {
+								contracts.Add(mr.Read<string[]>().ToList());
+								DarkLog.Debug("element at " + i + " is " + contracts.ElementAt(i).ToString());
+							}
+							Task.Delay(1000).ContinueWith(_ =>
+							{
+								ContractWorker.fetch.syncContractsWithTeam(contracts);
+							});
 						}
 						DarkLog.Debug("team stuff worked");
 						Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;

@@ -121,6 +121,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[0].Add(contractTitle);
 
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -134,6 +135,7 @@ namespace DarkMultiPlayer {
 
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -147,6 +149,7 @@ namespace DarkMultiPlayer {
 
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -160,6 +163,7 @@ namespace DarkMultiPlayer {
 
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -173,6 +177,7 @@ namespace DarkMultiPlayer {
 
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -186,6 +191,7 @@ namespace DarkMultiPlayer {
 
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -203,6 +209,7 @@ namespace DarkMultiPlayer {
 				teamStatus.contracts[3].Remove(contractTitle);
 				teamStatus.contracts[4].Remove(contractTitle);
 				teamStatus.contracts[5].Remove(contractTitle);
+				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -210,33 +217,39 @@ namespace DarkMultiPlayer {
 			DarkLog.Debug("syncing contracts with team");
 			for(int i = 0; i < contracts.Count(); i++) {
 				foreach(string contractTitle in contracts[i]) {
-					switch(i) {
+					DarkLog.Debug("Syncing contract: " + contractTitle + " type: " + i);
+					Contract contract = ContractSystem.Instance.Contracts.Find(someContract => someContract.Title == contractTitle);
+					DarkLog.Debug("switcing on contract type");
+					DarkLog.Debug("contract state = " + contract.ContractState);
+					switch (i) {
 						case 0:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
+							if(contract.ContractState != Contract.State.Active) contract.Accept();
 							break;
 						case 1:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Cancel();
+							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
+							if (contract.ContractState != Contract.State.Cancelled) contract.Cancel();
 							break;
 						case 2:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Complete();
+							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
+							if (contract.ContractState != Contract.State.Completed) contract.Complete();
 							break;
 						case 3:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Decline();
+							if (contract.ContractState != Contract.State.Declined) contract.Decline();
 							break;
 						case 4:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Fail();
+							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
+							if (contract.ContractState != Contract.State.Failed) contract.Fail();
 							break;
 						case 5:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).IsFinished();
+							if (contract.ContractState != Contract.State.DeadlineExpired) contract.IsFinished();
 							break;
 						case 6:
-							ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Offer();
+							if (contract.ContractState != Contract.State.Offered) contract.Offer();
 							break;
 						default:
 							DarkLog.Debug("CONTRACT SYNC FAILED");
 							break;
 					}
-					
 				}
 			}
 		}
@@ -267,7 +280,7 @@ namespace DarkMultiPlayer {
 			List<string> contractNames = new List<string>();
 			switch(type.ToUpper()) {
 				case "ACCEPTED":
-					List<Contract> acceptedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Offered);
+					List<Contract> acceptedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Active);
 					foreach(Contract contract in acceptedContracts) {
 						contractNames.Add(contract.Title);
 					}

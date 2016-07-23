@@ -89,6 +89,7 @@ namespace DarkMultiPlayer
             DarkLog.Debug("Syncing funds with team to target funds: " + funds.ToString());
             double diff = funds - Funding.Instance.Funds;
             Funding.Instance.AddFunds(diff, TransactionReasons.None);
+			DarkLog.Debug("Funds succesfully synced");
         }
 
         public void syncReputationWithTeam(float rep)
@@ -97,6 +98,7 @@ namespace DarkMultiPlayer
             float diff = rep - Reputation.Instance.reputation;
             //Reputation.Instance.addReputation_discrete(diff, TransactionReasons.None);
             Reputation.Instance.AddReputation(rep, TransactionReasons.None);
-        }
+			DarkLog.Debug("Reputation succesfully synced");
+		}
     }
 }

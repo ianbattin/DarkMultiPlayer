@@ -5,6 +5,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using DarkMultiPlayerCommon;
 using MessageStream2;
+using System.Linq;
 
 namespace DarkMultiPlayerServer.Messages
 {
@@ -250,6 +251,11 @@ namespace DarkMultiPlayerServer.Messages
 						mw.Write<float>(team.science);
 						mw.Write<string[]>(team.research.ToArray());
 						mw.Write<string[]>(team.purchased.ToArray());
+
+						for(int i = 0; i < 7; i++) {
+							mw.Write<string[]>(team.contracts.ElementAt(i).ToArray());
+							DarkLog.Normal("element at " + i + " is " + team.contracts.ElementAt(i).ToString());
+						}
 					}
 					
                     mw.Write<bool>(Settings.settingsStore.compressionEnabled);
