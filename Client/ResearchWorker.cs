@@ -37,24 +37,24 @@ namespace DarkMultiPlayer
         // GameEvents
         public void onTechnologyResearched(GameEvents.HostTargetAction<RDTech, RDTech.OperationResult> targetAction)
         {
-            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+			researchTech(targetAction.host.techID);
+			DarkLog.Debug("Researched: " + targetAction.host.techID);
+			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
                 return;
             if (RDTech.OperationResult.Successful.Equals(targetAction.target))
             {
-                DarkLog.Debug("Researched: " + targetAction.host.techID);
                 //ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(targetAction.host.techID);
                 using (MessageWriter mw = new MessageWriter())
                 {
                     mw.Write<string>(targetAction.host.techID);
                     NetworkWorker.fetch.SendResearchTechUnlocked(mw.GetMessageBytes());
-                } 
-
+                }
             }
         }
 
         public void onPartPurchased(AvailablePart part)
         {
-            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
                 return;
             using (MessageWriter mw = new MessageWriter())
             {
@@ -125,8 +125,8 @@ namespace DarkMultiPlayer
 				newResearch.Add(techID);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					syncResearchWithTeam(newResearch);
-				else
-					researchTech(techID);
+				//else
+					//researchTech(techID);
 				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).research.Add(techID);
 			}
         }
@@ -143,8 +143,8 @@ namespace DarkMultiPlayer
 				newPurchase.Add(partName);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					syncPurchasedWithTeam(newPurchase);
-				else
-					purchasePart(partName);
+				//else
+					//purchasePart(partName);
 				TeamWorker.fetch.teams.Find(team => team.teamName == teamName).purchased.Add(partName);
 			}
         }
@@ -157,6 +157,7 @@ namespace DarkMultiPlayer
 			ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
 			if (!node.partsPurchased.Contains(part)) {
 				node.partsPurchased.Add(part);
+				Funding.Instance.AddFunds(-part.cost, TransactionReasons.None);
 				ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
 			}
         }
@@ -164,7 +165,7 @@ namespace DarkMultiPlayer
 		public void researchTech(string techID) {
 			ProtoRDNode node = new ProtoRDNode();
 			node = node.FindNodeByID(techID, AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>());
-			if (node.tech.state != RDTech.State.Available) { 
+			if (node.tech.state != RDTech.State.Available) {
 				node.tech.state = RDTech.State.Available;
 				ResearchAndDevelopment.Instance.SetTechState(node.tech.techID, node.tech);
 				DarkLog.Debug("Tech state for: " + techID + " = " + ResearchAndDevelopment.Instance.GetTechState(node.tech.techID) + "   |  node.tech.state");
@@ -211,6 +212,7 @@ namespace DarkMultiPlayer
         public List<string> getAvailableTechIDs()
         {
             List<string> techList = new List<string>();
+			techList.Add("start");
 			/*foreach (AvailablePart part in PartLoader.LoadedPartsList)
             {
                 ProtoTechNode tech = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);

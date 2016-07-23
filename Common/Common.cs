@@ -542,8 +542,15 @@ namespace DarkMultiPlayerCommon
         TEAM_LEAVE_REQUEST,
         RESEARCH_TECH_STATE,
         RESEARCH_TECH_UNLOCKED,
-        RESEARCH_PART_PURCHASED
-    }
+        RESEARCH_PART_PURCHASED,
+		CONTRACT_ACCEPTED,
+		CONTRACT_CANCELLED,
+		CONTRACT_COMPLETED,
+		CONTRACT_DECLINED,
+		CONTRACT_FAILED,
+		CONTRACT_FINISHED,
+		CONTRACT_OFFERED
+	}
 
     public enum ServerMessageType
     {
@@ -586,8 +593,15 @@ namespace DarkMultiPlayerCommon
         TEAM_LEAVE_RESPONSE,
         RESEARCH_TECH_STATE,
         RESEARCH_TECH_UNLOCKED,
-        RESEARCH_PART_PURCHASED
-    }
+        RESEARCH_PART_PURCHASED,
+		CONTRACT_ACCEPTED,
+		CONTRACT_CANCELLED,
+		CONTRACT_COMPLETED,
+		CONTRACT_DECLINED,
+		CONTRACT_FAILED,
+		CONTRACT_FINISHED,
+		CONTRACT_OFFERED
+	}
 
     public enum ConnectionStatus
     {
@@ -764,6 +778,25 @@ namespace DarkMultiPlayerCommon
         public float science;
 		public List<string> research = new List<string>();
 		public List<string> purchased = new List<string>();
+
+		public List<List<string>> contracts = new List<List<string>>();
+		private List<string> accepted = new List<string>();
+		private List<string> cancelled = new List<string>();
+		private List<string> completed = new List<string>();
+		private List<string> declined = new List<string>();
+		private List<string> failed = new List<string>();
+		private List<string> finished = new List<string>();
+		private List<string> offered = new List<string>();
+		
+		public TeamStatus() {
+			this.contracts.Add(this.accepted);
+			this.contracts.Add(this.cancelled);
+			this.contracts.Add(this.completed);
+			this.contracts.Add(this.declined);
+			this.contracts.Add(this.failed);
+			this.contracts.Add(this.finished);
+			this.contracts.Add(this.offered);
+		}
 	}
 
     public class RDNodeStatus

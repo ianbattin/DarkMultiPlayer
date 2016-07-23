@@ -4,38 +4,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Contracts;
 
 namespace DarkMultiPlayer
 {
-    public class CareerWorker
-    {
-        public bool workerEnabled = false;
-        private static CareerWorker singleton;
+	public class CareerWorker {
+		public bool workerEnabled = false;
+		private static CareerWorker singleton;
 
-        public static CareerWorker fetch
-        {
-            get
-            {
-                return singleton;
-            }
-        }
+		public static CareerWorker fetch {
+			get {
+				return singleton;
+			}
+		}
 
-        public static void Reset()
-        {
-            if(singleton != null)
-            {
-                singleton.workerEnabled = false;
-                GameEvents.OnFundsChanged.Remove(singleton.onFundsChanged);
-                GameEvents.OnReputationChanged.Remove(singleton.onReputationChanged);
-            }
-            singleton = new CareerWorker();
-            DarkLog.Debug("CareerWorker: Reset");
-            GameEvents.OnFundsChanged.Add(singleton.onFundsChanged);
-            GameEvents.OnReputationChanged.Add(singleton.onReputationChanged);
-        }
+		public static void Reset() {
+			if (singleton != null) {
+				singleton.workerEnabled = false;
+				GameEvents.OnFundsChanged.Remove(singleton.onFundsChanged);
+				GameEvents.OnReputationChanged.Remove(singleton.onReputationChanged);
+			}
+			singleton = new CareerWorker();
+			DarkLog.Debug("CareerWorker: Reset");
+			GameEvents.OnFundsChanged.Add(singleton.onFundsChanged);
+			GameEvents.OnReputationChanged.Add(singleton.onReputationChanged);
+		}
 
-
-        public void onFundsChanged(double funds, TransactionReasons reasons)
+		public void onFundsChanged(double funds, TransactionReasons reasons)
         {
             if (reasons == TransactionReasons.None)
                 return;

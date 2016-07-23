@@ -243,7 +243,6 @@ namespace DarkMultiPlayerServer.Messages
                     mw.Write<string>(client.teamName);
 					DarkLog.Normal("Sending data for team: " + client.teamName);
 					TeamStatus team = TeamControl.teams.Find(TeamControl => TeamControl.teamName == client.teamName);
-					
 					if(team != null) {
 						DarkLog.Normal("Sending team data");
 						mw.Write<double>(team.funds);

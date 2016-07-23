@@ -884,7 +884,28 @@ namespace DarkMultiPlayer
                     case ServerMessageType.RESEARCH_PART_PURCHASED:
                         ResearchWorker.fetch.handlePartPurchased(message.data);
                         break;
-                    default:
+					case ServerMessageType.CONTRACT_ACCEPTED:
+						ContractWorker.fetch.handleContractAcceptedMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_CANCELLED:
+						ContractWorker.fetch.handleContractCancelledMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_COMPLETED:
+						ContractWorker.fetch.handleContractCompletedMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_DECLINED:
+						ContractWorker.fetch.handleContractDeclinedMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_FAILED:
+						ContractWorker.fetch.handleContractFailedMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_FINISHED:
+						ContractWorker.fetch.handleContractFinishedMessage(message.data);
+						break;
+					case ServerMessageType.CONTRACT_OFFERED:
+						ContractWorker.fetch.handleContractOfferedMessage(message.data);
+						break;
+					default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         break;
                 }
@@ -2103,10 +2124,60 @@ namespace DarkMultiPlayer
             QueueOutgoingMessage(newMessage, true);
         }
 
-        /// <summary>
-        /// If you are a mod, call DMPModInterface.fetch.SendModMessage.
-        /// </summary>
-        public void SendModMessage(byte[] messageData, bool highPriority)
+		public void SendContractAcceptedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_ACCEPTED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractCancelledMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_CANCELLED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractCompletedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_COMPLETED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractDeclinedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_DECLINED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractFailedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_FAILED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractFinishedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_FINISHED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+		public void SendContractOfferedMessage(byte[] messageData) {
+			ClientMessage newMessage = new ClientMessage();
+			newMessage.type = ClientMessageType.CONTRACT_OFFERED;
+			newMessage.data = messageData;
+			QueueOutgoingMessage(newMessage, true);
+		}
+
+
+		/// <summary>
+		/// If you are a mod, call DMPModInterface.fetch.SendModMessage.
+		/// </summary>
+		public void SendModMessage(byte[] messageData, bool highPriority)
         {
             ClientMessage newMessage = new ClientMessage();
             newMessage.type = ClientMessageType.MOD_DATA;

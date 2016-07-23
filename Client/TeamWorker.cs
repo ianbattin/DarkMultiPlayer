@@ -64,6 +64,15 @@ namespace DarkMultiPlayer
                     mw.Write<float>(ResearchAndDevelopment.Instance.Science);
 					mw.Write<string[]>(ResearchWorker.fetch.getAvailableTechIDs().ToArray());
 					mw.Write<string[]>(ResearchWorker.fetch.getPurchasedParts().ToArray());
+					DarkLog.Debug("About to get contracts...");
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("accepted").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("cancelled").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("completed").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("declined").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("failed").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("finished").ToArray());
+					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("offered").ToArray());
+					DarkLog.Debug("Got contracts");
 					//mw.Write<RDNodeStatus>
 				} else if(HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
                     mw.Write<float>(ResearchAndDevelopment.Instance.Science);
@@ -129,6 +138,12 @@ namespace DarkMultiPlayer
                 team.science = mr.Read<float>();
 				team.research = new List<string>(mr.Read<string[]>());
 				team.purchased = new List<string>(mr.Read<string[]>());
+
+				//Getting all contract types
+				team.contracts = new List<List<string>>();
+				for (int i = 0; i < 7; i++) {
+					team.contracts.Add(mr.Read<string[]>().ToList());
+				}
 
 				int memberCount = mr.Read<int>();
                 DarkLog.Debug("deserializing "+memberCount+" members");
@@ -196,6 +211,13 @@ namespace DarkMultiPlayer
 					ResearchWorker.fetch.syncResearchWithTeam(research);
 					List<string> purchased = new List<string>(mr.Read<string[]>());
 					ResearchWorker.fetch.syncPurchasedWithTeam(purchased);
+
+					//Getting all contract types
+					List<List<string>> contracts = new List<List<string>>();
+					for (int i = 0; i < 7; i++) {
+						contracts.Add(mr.Read<string[]>().ToList());
+					}
+					ContractWorker.fetch.syncContractsWithTeam(contracts);
 
 					DarkLog.Debug("Joinging Team - Funds: " + funds + " | Rep: " + reputation + " | Science: " + science);
 					string researchString = "";
@@ -292,6 +314,13 @@ namespace DarkMultiPlayer
                             team.science = mr.Read<float>();
 							team.research = new List<string>(mr.Read<string[]>());
 							team.purchased = new List<string>(mr.Read<string[]>());
+
+							//Getting all contract types
+							team.contracts = new List<List<string>>();
+							for (int i = 0; i < 7; i++) {
+								team.contracts.Add(mr.Read<string[]>().ToList());
+							}
+
 							int memberCount = mr.Read<int>();
                             DarkLog.Debug("deserializing members");
                             team.teamMembers = new List<MemberStatus>();
@@ -321,6 +350,12 @@ namespace DarkMultiPlayer
                                     team.science = mr.Read<float>();
 									team.research = new List<string>(mr.Read<string[]>());
 									team.purchased = new List<string>(mr.Read<string[]>());
+
+									//Getting all contract types
+									team.contracts = new List<List<string>>();
+									for (int j = 0; j < 7; j++) {
+										team.contracts.Add(mr.Read<string[]>().ToList());
+									}
 
 									int memberCount = mr.Read<int>();
                                     DarkLog.Debug("TEAM_STATUS: memberCount is " + memberCount.ToString());

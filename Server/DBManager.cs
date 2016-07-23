@@ -43,7 +43,8 @@ namespace DarkMultiPlayerServer
                 sql += "CREATE TABLE team_members(id integer, name text, pubkey text, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
                 sql += "CREATE TABLE team_research (id integer, techID  text, UNIQUE (id,techID) ON CONFLICT REPLACE, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
                 sql += "CREATE TABLE team_parts (id integer, partName  text, UNIQUE (id,partName) ON CONFLICT REPLACE, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
-                sql += "CREATE TRIGGER del_team_on_last_member AFTER DELETE on team_members BEGIN DELETE FROM team  WHERE team.id IN (SELECT team.id FROM team LEFT JOIN team_members ON team.id = team_members.id GROUP BY team.id HAVING COUNT(team_members.id) = 0);END; ";
+				sql += "CREATE TABLE team_contracts (id integer, acceptedContracts  text, cancelledContracts  text, completedContracts  text, declinedContracts  text, failedContracts  text, finishedContracts  text, offeredContracts  text, UNIQUE (id,acceptedContracts,cancelledContracts,completedContracts,declinedContracts,failedContracts,finishedContracts,offeredContracts) ON CONFLICT REPLACE, FOREIGN KEY(id) REFERENCES team(id) ON DELETE CASCADE);";
+				sql += "CREATE TRIGGER del_team_on_last_member AFTER DELETE on team_members BEGIN DELETE FROM team  WHERE team.id IN (SELECT team.id FROM team LEFT JOIN team_members ON team.id = team_members.id GROUP BY team.id HAVING COUNT(team_members.id) = 0);END; ";
                 sql += "COMMIT;";
                 executeQry(sql);
             }
@@ -65,7 +66,7 @@ namespace DarkMultiPlayerServer
         /// <param name="creator"></param>
         /// <param name="creator_pubKey"></param>
         /// <returns></returns>
-        public static TeamStatus createNewTeam(string name, string password, double funds, float reputation, float science, List<string> research, List<string> purchased, string creator, string creator_pubKey)
+        public static TeamStatus createNewTeam(string name, string password, double funds, float reputation, float science, List<string> research, List<string> purchased, List<List<string>> contracts, string creator, string creator_pubKey)
         {
             try {
                 string sql = "BEGIN;";
@@ -98,6 +99,7 @@ namespace DarkMultiPlayerServer
                 team.science = science;
 				team.research = research;
 				team.purchased = purchased;
+				team.contracts = contracts;
                 team.teamMembers = new List<MemberStatus>();
                 MemberStatus member = new MemberStatus();
                 member.memberName = creator;
@@ -258,6 +260,7 @@ namespace DarkMultiPlayerServer
 			team.science = reader.GetFloat(4);
 			team.research = getTeamResearch(team.teamName);
 			team.purchased = getTeamParts(team.teamName);
+			team.contracts = getTeamContracts(team.teamName);
 
             string sql = "SELECT name FROM team_members where id = @id";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
@@ -538,7 +541,109 @@ namespace DarkMultiPlayerServer
             }
         }
 
-        public static List<string> getTeamResearch(string teamName)
+		/// <summary>
+		/// Updates team contracts
+		/// </summary>
+		/// <param name="teamName"></param>
+		/// <param name="contractTitle"></param>
+		/// <param name="contractType"></param>
+		public static void updateTeamContracts(string teamName, string contractTitle, string contractType) {
+			switch(contractType.ToUpper()) {
+				case "ACCEPTED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,acceptedContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "CANCELLED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,cancelledContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "COMPLETED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,completedContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "DECLINED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,declinedContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "FAILED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,failedContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "FINISHED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,finishedContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+				case "OFFERED":
+					try {
+						string sql = "INSERT INTO team_contracts(id,offeredContracts) VALUES((SELECT id FROM TEAM WHERE name = @teamName),@contractTitle);";
+						SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
+						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
+						int ret = command.ExecuteNonQuery();
+						DarkLog.Debug("DBManager: added purchasedPart to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+					}
+					catch (SQLiteException e) {
+						DarkLog.Debug(e.Message);
+					}
+					break;
+			}
+		}
+
+		public static List<string> getTeamResearch(string teamName)
         {
             try
             {
@@ -608,12 +713,239 @@ namespace DarkMultiPlayerServer
             }
         }
 
-        /// <summary>
-        /// Internal helper to execute some SQL commands
-        /// possibly deprecated
-        /// </summary>
-        /// <param name="qry"></param>
-        private static void executeQry(string qry)
+		public static List<List<string>> getTeamContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				List<List<string>> contracts = new List<List<string>>();
+				contracts.Add(getTeamAcceptedContracts(teamName));
+				contracts.Add(getTeamCancelledContracts(teamName));
+				contracts.Add(getTeamCompletedContracts(teamName));
+				contracts.Add(getTeamDeclinedContracts(teamName));
+				contracts.Add(getTeamFailedContracts(teamName));
+				contracts.Add(getTeamFinishedContracts(teamName));
+				contracts.Add(getTeamOfferedContracts(teamName));
+
+				return contracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamAcceptedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT acceptedContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> acceptedContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						acceptedContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return acceptedContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamCancelledContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT cancelledContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> cancelledContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						cancelledContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return cancelledContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamCompletedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT completedContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> completedContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						completedContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return completedContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamDeclinedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT declinedContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> declinedContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						declinedContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return declinedContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamFailedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT failedContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> failedContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						failedContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return failedContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamFinishedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT finishedContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> finishedContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						finishedContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return finishedContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		private static List<string> getTeamOfferedContracts(string teamName) {
+			try {
+				int teamID = DBManager.getTeamIdByTeamName(teamName);
+				if (teamID < 0) {
+					DarkLog.Debug("DBManager.getTeamParts: could not find teamName: " + teamName);
+					return null;
+				}
+				string sql = "SELECT offeredContracts FROM team_contracts WHERE id = @id;";
+				SQLiteCommand cmd = new SQLiteCommand(sql, m_dbConnection);
+				cmd.Parameters.Add(new SQLiteParameter("@id", teamID));
+				SQLiteDataReader reader = cmd.ExecuteReader();
+				List<string> offeredContracts = new List<string>();
+				if (reader.HasRows) {
+					while (reader.Read()) {
+						offeredContracts.Add(reader.GetString(0));
+					}
+				}
+				else {
+					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					return null;
+				}
+				return offeredContracts;
+			}
+			catch (SQLiteException e) {
+				DarkLog.Debug("getTeamResearch: " + e.Message);
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Internal helper to execute some SQL commands
+		/// possibly deprecated
+		/// </summary>
+		/// <param name="qry"></param>
+		private static void executeQry(string qry)
         {
             DarkLog.Debug("Executing qry: " + qry);
             SQLiteCommand command = new SQLiteCommand(qry, m_dbConnection);

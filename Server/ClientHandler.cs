@@ -674,6 +674,28 @@ namespace DarkMultiPlayerServer
                     case ClientMessageType.RESEARCH_PART_PURCHASED:
                         Messages.ResearchControl.handleResearchPartPurchased(client, message.data);
                         break;
+					case ClientMessageType.CONTRACT_ACCEPTED:
+                        Messages.ContractControl.handleContractAcceptedMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_CANCELLED:
+                        Messages.ContractControl.handleContractCancelledMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_COMPLETED:
+                        Messages.ContractControl.handleContractCompletedMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_DECLINED:
+                        Messages.ContractControl.handleContractDeclinedMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_FAILED:
+                        Messages.ContractControl.handleContractFailedMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_FINISHED:
+                        Messages.ContractControl.handleContractFinishedMessage(client, message.data);
+                        break;
+					case ClientMessageType.CONTRACT_OFFERED:
+                        Messages.ContractControl.handleContractOfferedMessage(client, message.data);
+                        break;
+
                     default:
                         DarkLog.Debug("Unhandled message type " + message.type);
                         Messages.ConnectionEnd.SendConnectionEnd(client, "Unhandled message type " + message.type);

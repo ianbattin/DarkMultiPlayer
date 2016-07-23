@@ -28,6 +28,7 @@ namespace DarkMultiPlayerServer.Messages
                 float science = 0f;
 				List<string> research = new List<string>();
 				List<string> purchased = new List<string>();
+				List<List<string>> contracts = new List<List<string>>();
                 switch (Settings.settingsStore.gameMode)
                 {
                     case GameMode.CAREER:
@@ -37,6 +38,11 @@ namespace DarkMultiPlayerServer.Messages
                             science = mr.Read<float>();
 							research = new List<string>(mr.Read<string[]>());
 							purchased = new List<string>(mr.Read<string[]>());
+
+							//Getting all contract types
+							for(int i = 0; i < 7; i++) {
+								contracts.Add(mr.Read<string[]>().ToList());
+							}
                         }
                         break;
                     case GameMode.SCIENCE:
@@ -46,7 +52,7 @@ namespace DarkMultiPlayerServer.Messages
                         break;
                 }
 
-                TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, research, purchased, client.playerName, client.publicKey);
+                TeamStatus team = DBManager.createNewTeam(teamName, password, funds, reputation, science, research, purchased, contracts, client.playerName, client.publicKey);
                 teams.Add(team);
 
                 // now send new info and responses!
@@ -66,7 +72,16 @@ namespace DarkMultiPlayerServer.Messages
                         mw.Write<float>(team.science);
 						mw.Write<string[]>(team.research.ToArray());
 						mw.Write<string[]>(team.purchased.ToArray());
-                        mw.Write<int>(team.teamMembers.Count);
+
+						mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
+						mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+
+						mw.Write<int>(team.teamMembers.Count);
                         DarkLog.Debug("handleTeamCreateRequest: sending " + team.teamMembers.Count + " teamMembers");
                         foreach(MemberStatus member in team.teamMembers)
                         {
@@ -116,7 +131,15 @@ namespace DarkMultiPlayerServer.Messages
                                         mw.Write<float>(team.science);
 										mw.Write<string[]>(team.research.ToArray());
 										mw.Write<string[]>(team.purchased.ToArray());
-                                    }
+
+										mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
+										mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+									}
                                     break;
                                 case GameMode.SCIENCE:
                                     {
@@ -133,6 +156,7 @@ namespace DarkMultiPlayerServer.Messages
                     ClientHandler.SendToClient(client, tJoinResp, true);
                     sendTeamStatusJoin(client);
 
+					//I DONT BELIEVE THIS IS NECESSARY ANYMORE---------------------------------------------------------------
                     ServerMessage tState = new ServerMessage();
                     tState.type = ServerMessageType.RESEARCH_TECH_STATE;
                     using (MessageWriter mw = new MessageWriter())
@@ -221,6 +245,14 @@ namespace DarkMultiPlayerServer.Messages
 				mw.Write<string[]>(team.research.ToArray());
 				mw.Write<string[]>(team.purchased.ToArray());
 
+				mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
+				mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+
 				// serialize member list
 				mw.Write<int>(team.teamMembers.Count);
                 foreach(MemberStatus member in team.teamMembers)
@@ -253,6 +285,14 @@ namespace DarkMultiPlayerServer.Messages
                     mw.Write<float>(team.science);
 					mw.Write<string[]>(team.research.ToArray());
 					mw.Write<string[]>(team.purchased.ToArray());
+
+					mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
+					mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
 
 					mw.Write<int>(team.teamMembers.Count);
                     foreach(MemberStatus member in team.teamMembers)
