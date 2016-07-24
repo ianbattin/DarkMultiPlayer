@@ -9,7 +9,6 @@ using UnityEngine;
 using DarkMultiPlayerCommon;
 using MessageStream2;
 using System.Linq;
-using System.Threading.Tasks.Task;
 
 namespace DarkMultiPlayer {
 	public class NetworkWorker
@@ -967,13 +966,15 @@ namespace DarkMultiPlayer {
                     {
                         PlayerStatusWorker.fetch.myPlayerStatus.teamName = mr.Read<string>();
 						DarkLog.Debug("Recieving data for: " + PlayerStatusWorker.fetch.myPlayerStatus.teamName);
-						if(PlayerStatusWorker.fetch.myPlayerStatus.teamName != "") {
+						if (PlayerStatusWorker.fetch.myPlayerStatus.teamName != "") {
 							DarkLog.Debug("receiving team data");
-							CareerWorker.fetch.syncFundsWithTeam(mr.Read<double>());
-							CareerWorker.fetch.syncReputationWithTeam(mr.Read<float>());
-							ScienceWorker.fetch.syncScienceWithTeam(mr.Read<float>());
-							ResearchWorker.fetch.syncResearchWithTeam(mr.Read<string[]>().ToList());
-							ResearchWorker.fetch.syncPurchasedWithTeam(mr.Read<string[]>().ToList());
+							var scheduler = new Scheduler();
+
+							double funds = mr.Read<double>();
+							float rep = mr.Read<float>();
+							float science = mr.Read<float>();
+							List<string> researched = mr.Read<string[]>().ToList();
+							List<string> purchased = mr.Read<string[]>().ToList();
 
 							//Getting all contract types
 							List<List<string>> contracts = new List<List<string>>();
@@ -981,10 +982,14 @@ namespace DarkMultiPlayer {
 								contracts.Add(mr.Read<string[]>().ToList());
 								DarkLog.Debug("element at " + i + " is " + contracts.ElementAt(i).ToString());
 							}
-							Task.Delay(1000).ContinueWith(_ =>
-							{
-								ContractWorker.fetch.syncContractsWithTeam(contracts);
-							});
+
+							//Still loading into game so this stuff may not be ready yet
+							scheduler.Execute(() => CareerWorker.fetch.syncFundsWithTeam(funds), 5000);
+							scheduler.Execute(() => CareerWorker.fetch.syncReputationWithTeam(rep), 5000);
+							scheduler.Execute(() => ScienceWorker.fetch.syncScienceWithTeam(science), 5000);
+							scheduler.Execute(() => ResearchWorker.fetch.syncResearchWithTeam(researched), 5000);
+							scheduler.Execute(() => ResearchWorker.fetch.syncPurchasedWithTeam(purchased), 5000);
+							scheduler.Execute(() => ContractWorker.fetch.syncContractsWithTeam(contracts), 5000);
 						}
 						DarkLog.Debug("team stuff worked");
 						Compression.compressionEnabled = mr.Read<bool>() && Settings.fetch.compressionEnabled;

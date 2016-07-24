@@ -220,7 +220,7 @@ namespace DarkMultiPlayer
 					List<string> purchased = new List<string>(mr.Read<string[]>());
 					ResearchWorker.fetch.syncPurchasedWithTeam(purchased);
 
-					//Getting all contract types
+					//Getting all contract types from teamstatus from databsse
 					List<List<string>> contracts = new List<List<string>>();
 					for (int i = 0; i < 7; i++) {
 						contracts.Add(mr.Read<string[]>().ToList());

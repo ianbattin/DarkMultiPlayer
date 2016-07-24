@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using DarkMultiPlayerCommon;
 using UnityEngine;
 using MessageStream2;
 
@@ -90,9 +90,17 @@ namespace DarkMultiPlayer
         /// <param name="science">Desired total science</param>
         public void syncScienceWithTeam(float science)
         {
-            DarkLog.Debug("syncing science with team to target science: " + science.ToString());
-            float diff = science - ResearchAndDevelopment.Instance.Science;
-            ResearchAndDevelopment.Instance.AddScience(diff, TransactionReasons.None);
+			try {
+				DarkLog.Debug("syncing science with team to target science: " + science.ToString());
+				float diff = science - ResearchAndDevelopment.Instance.Science;
+				ResearchAndDevelopment.Instance.AddScience(diff, TransactionReasons.None);
+			} catch(Exception e) {
+				if (e.InnerException is NullReferenceException) {
+					DarkLog.Debug("Science sync failed");
+					var scheduler = new Scheduler();
+					scheduler.Execute(() => syncScienceWithTeam(science), 5000);
+				}
+			}
         }
     }
 }

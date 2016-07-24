@@ -827,7 +827,46 @@ namespace DarkMultiPlayerCommon
         public double planetTime = 0;
     }
 
-    public enum WindowId : int
+	public class ScheduledTask {
+		internal readonly Action Action;
+		internal System.Timers.Timer Timer;
+		internal EventHandler TaskComplete;
+
+		public ScheduledTask(Action action, int timeoutMs) {
+			Action = action;
+			Timer = new System.Timers.Timer() { Interval = timeoutMs };
+			Timer.Elapsed += TimerElapsed;
+		}
+
+		private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e) {
+			Timer.Stop();
+			Timer.Elapsed -= TimerElapsed;
+			Timer = null;
+
+			Action();
+			TaskComplete(this, EventArgs.Empty);
+		}
+	}
+
+	public class Scheduler {
+		private readonly Dictionary<Action, ScheduledTask> _scheduledTasks = new Dictionary<Action, ScheduledTask>();
+
+		public void Execute(Action action, int timeoutMs) {
+			var task = new ScheduledTask(action, timeoutMs);
+			task.TaskComplete += RemoveTask;
+			_scheduledTasks.Add(action, task);
+			task.Timer.Start();
+		}
+
+		private void RemoveTask(object sender, EventArgs e) {
+			var task = (ScheduledTask)sender;
+			task.TaskComplete -= RemoveTask;
+			ScheduledTask deleted;
+			_scheduledTasks.Remove(task.Action);
+		}
+	}
+
+	public enum WindowId : int
     {
         MAIN_WINDOW = 6701,
         CONNECTION_WINDOW = 6702,

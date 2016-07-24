@@ -153,22 +153,38 @@ namespace DarkMultiPlayer
 
         public void purchasePart(string partName)
         {
-			AvailablePart part = PartLoader.getPartInfoByName(partName);
-			ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
-			if (!node.partsPurchased.Contains(part)) {
-				node.partsPurchased.Add(part);
-				Funding.Instance.AddFunds(-part.cost, TransactionReasons.None);
-				ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
+			try {
+				AvailablePart part = PartLoader.getPartInfoByName(partName);
+				ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
+				if (!node.partsPurchased.Contains(part)) {
+					node.partsPurchased.Add(part);
+					Funding.Instance.AddFunds(-part.cost, TransactionReasons.None);
+					ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
+				}
+			} catch(Exception e) {
+				if(e.InnerException is NullReferenceException) {
+					DarkLog.Debug("Purchase part failed");
+					var scheduler = new Scheduler();
+					scheduler.Execute(() => purchasePart(partName), 5000);
+				}
 			}
         }
 
 		public void researchTech(string techID) {
-			ProtoRDNode node = new ProtoRDNode();
-			node = node.FindNodeByID(techID, AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>());
-			if (node.tech.state != RDTech.State.Available) {
-				node.tech.state = RDTech.State.Available;
-				ResearchAndDevelopment.Instance.SetTechState(node.tech.techID, node.tech);
-				DarkLog.Debug("Tech state for: " + techID + " = " + ResearchAndDevelopment.Instance.GetTechState(node.tech.techID) + "   |  node.tech.state");
+			try { 
+				ProtoRDNode node = new ProtoRDNode();
+				node = node.FindNodeByID(techID, AssetBase.RnDTechTree.GetTreeNodes().ToList<ProtoRDNode>());
+				if (node.tech.state != RDTech.State.Available) {
+					node.tech.state = RDTech.State.Available;
+					ResearchAndDevelopment.Instance.SetTechState(node.tech.techID, node.tech);
+					DarkLog.Debug("Tech state for: " + techID + " = " + ResearchAndDevelopment.Instance.GetTechState(node.tech.techID) + "   |  node.tech.state");
+				}
+			} catch(Exception e) {
+				if(e.InnerException is NullReferenceException) {
+					DarkLog.Debug("Research tech failed");
+					var scheduler = new Scheduler();
+					scheduler.Execute(() => researchTech(techID), 5000);
+				}
 			}
 		}
 

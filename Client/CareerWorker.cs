@@ -86,19 +86,35 @@ namespace DarkMultiPlayer
 
         public void syncFundsWithTeam(double funds)
         {
-            DarkLog.Debug("Syncing funds with team to target funds: " + funds.ToString());
-            double diff = funds - Funding.Instance.Funds;
-            Funding.Instance.AddFunds(diff, TransactionReasons.None);
-			DarkLog.Debug("Funds succesfully synced");
+			try {
+				DarkLog.Debug("Syncing funds with team to target funds: " + funds.ToString());
+				double diff = funds - Funding.Instance.Funds;
+				Funding.Instance.AddFunds(diff, TransactionReasons.None);
+				DarkLog.Debug("Funds succesfully synced");
+			} catch(Exception e) {
+				if(e.InnerException is NullReferenceException) {
+					DarkLog.Debug("Funds sync failed");
+					var scheduler = new Scheduler();
+					scheduler.Execute(() => syncFundsWithTeam(funds), 5000);
+				}
+			}
         }
 
         public void syncReputationWithTeam(float rep)
         {
-            DarkLog.Debug("Syncing reputation with team to target reputation: " + rep.ToString());
-            float diff = rep - Reputation.Instance.reputation;
-            //Reputation.Instance.addReputation_discrete(diff, TransactionReasons.None);
-            Reputation.Instance.AddReputation(rep, TransactionReasons.None);
-			DarkLog.Debug("Reputation succesfully synced");
+			try {
+				DarkLog.Debug("Syncing reputation with team to target reputation: " + rep.ToString());
+				float diff = rep - Reputation.Instance.reputation;
+				//Reputation.Instance.addReputation_discrete(diff, TransactionReasons.None);
+				Reputation.Instance.AddReputation(rep, TransactionReasons.None);
+				DarkLog.Debug("Reputation succesfully synced");
+			} catch(Exception e) {
+				if(e.InnerException is NullReferenceException) {
+					DarkLog.Debug("Rep sync failed");
+					var scheduler = new Scheduler();
+					scheduler.Execute(() => syncReputationWithTeam(rep), 5000);
+				}
+			}
 		}
     }
 }

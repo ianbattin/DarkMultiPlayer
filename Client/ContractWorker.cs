@@ -215,40 +215,69 @@ namespace DarkMultiPlayer {
 
 		public void syncContractsWithTeam(List<List<string>> contracts) {
 			DarkLog.Debug("syncing contracts with team");
-			for(int i = 0; i < contracts.Count(); i++) {
-				foreach(string contractTitle in contracts[i]) {
-					DarkLog.Debug("Syncing contract: " + contractTitle + " type: " + i);
-					Contract contract = ContractSystem.Instance.Contracts.Find(someContract => someContract.Title == contractTitle);
-					DarkLog.Debug("switcing on contract type");
-					DarkLog.Debug("contract state = " + contract.ContractState);
-					switch (i) {
-						case 0:
-							if(contract.ContractState != Contract.State.Active) contract.Accept();
-							break;
-						case 1:
-							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
-							if (contract.ContractState != Contract.State.Cancelled) contract.Cancel();
-							break;
-						case 2:
-							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
-							if (contract.ContractState != Contract.State.Completed) contract.Complete();
-							break;
-						case 3:
-							if (contract.ContractState != Contract.State.Declined) contract.Decline();
-							break;
-						case 4:
-							//ContractSystem.Instance.Contracts.Find(contract => contract.Title == contractTitle).Accept();
-							if (contract.ContractState != Contract.State.Failed) contract.Fail();
-							break;
-						case 5:
-							if (contract.ContractState != Contract.State.DeadlineExpired) contract.IsFinished();
-							break;
-						case 6:
-							if (contract.ContractState != Contract.State.Offered) contract.Offer();
-							break;
-						default:
-							DarkLog.Debug("CONTRACT SYNC FAILED");
-							break;
+			for (int i = 0; i < contracts.Count(); i++) {
+				foreach (string contractTitle in contracts[i]) {
+					try {
+						DarkLog.Debug("Syncing contract: " + contractTitle + " type: " + i + " | num contracts in type: " + contracts[i].Count());
+						Contract contract = ContractSystem.Instance.Contracts.Find(someContract => someContract.Title == contractTitle);
+						DarkLog.Debug("switcing on contract type");
+						DarkLog.Debug("contract state = " + contract.ContractState);
+
+						double funds = Funding.Instance.Funds;
+						float rep = Reputation.Instance.reputation;
+						float science = ResearchAndDevelopment.Instance.Science;
+						switch (i) {
+							case 0:
+								DarkLog.Debug("Contracts: " + contractTitle + " accepted");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								break;
+							case 1:
+								DarkLog.Debug("Contracts: " + contractTitle + " cancelled");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Cancelled) contract.Cancel();
+								break;
+							case 2:
+								DarkLog.Debug("Contracts: " + contractTitle + " completed");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Completed) contract.Complete();
+								break;
+							case 3:
+								DarkLog.Debug("Contracts: " + contractTitle + " declined");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Declined) contract.Decline();
+								break;
+							case 4:
+								DarkLog.Debug("Contracts: " + contractTitle + " failed");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Failed) contract.Fail();
+								break;
+							case 5:
+								DarkLog.Debug("Contracts: " + contractTitle + " finished");
+								if (contract.ContractState != Contract.State.DeadlineExpired) contract.IsFinished();
+								break;
+							case 6:
+								DarkLog.Debug("Contracts: " + contractTitle + " offered");
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								break;
+							default:
+								DarkLog.Debug("CONTRACT SYNC FAILED");
+								break;
+						}
+						Funding.Instance.AddFunds(funds - Funding.Instance.Funds, TransactionReasons.None); //prevents being paid twice
+						Reputation.Instance.AddReputation(rep - Reputation.Instance.reputation, TransactionReasons.None);
+						ResearchAndDevelopment.Instance.AddScience(science - ResearchAndDevelopment.Instance.Science, TransactionReasons.None);
+						/*
+						//Make sure team is synced from database
+						CareerWorker.fetch.syncFundsWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).funds);
+						CareerWorker.fetch.syncReputationWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).reputation);
+						ScienceWorker.fetch.syncScienceWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).science);
+						*/
+						} catch (Exception e) {
+							DarkLog.Debug("SYNCING CONTRACTS OF TYPE: " + i + " WITH TEAM FAILED");
 					}
 				}
 			}
