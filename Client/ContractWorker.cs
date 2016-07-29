@@ -41,6 +41,7 @@ namespace DarkMultiPlayer {
 				GameEvents.Contract.onOffered.Remove(singleton.onContractOffered);
 			}
 			singleton = new ContractWorker();
+			singleton.syncingContracts = false;
 			DarkLog.Debug("ContractWorker: Reset");
 			GameEvents.Contract.onAccepted.Add(singleton.onContractAccepted);
 			GameEvents.Contract.onCancelled.Add(singleton.onContractCancelled);
@@ -52,7 +53,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractAccepted(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -63,7 +64,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractCancelled(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -74,7 +75,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractCompleted(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -85,7 +86,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractDeclined(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -96,7 +97,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractFailed(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -107,7 +108,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractFinished(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
@@ -118,7 +119,7 @@ namespace DarkMultiPlayer {
 		}
 
 		public void onContractOffered(Contract data) {
-			if (!ContractWorker.fetch.syncingContracts)
+			if (ContractWorker.fetch.syncingContracts)
 				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
