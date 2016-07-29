@@ -243,7 +243,7 @@ namespace DarkMultiPlayerServer.Messages
                 {
                     mw.Write<string>(client.teamName);
 					DarkLog.Normal("Sending data for team: " + client.teamName);
-					TeamStatus team = TeamControl.teams.Find(TeamControl => TeamControl.teamName == client.teamName);
+					TeamStatus team = DBManager.getTeamStatus(client.teamName);
 					if(team != null) {
 						DarkLog.Normal("Sending team data");
 						mw.Write<double>(team.funds);
@@ -254,7 +254,7 @@ namespace DarkMultiPlayerServer.Messages
 
 						for(int i = 0; i < 7; i++) {
 							mw.Write<string[]>(team.contracts.ElementAt(i).ToArray());
-							DarkLog.Normal("element at " + i + " is " + team.contracts.ElementAt(i).ToString());
+							//DarkLog.Normal("element at " + i + " is " + team.contracts.ElementAt(i).ToString());
 						}
 					}
 					

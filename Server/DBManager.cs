@@ -667,7 +667,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added ACCEPTED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -682,7 +682,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added CANCELLED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -697,7 +697,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added COMPLETED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -712,7 +712,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added DECLINED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -727,7 +727,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added FAILED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -742,7 +742,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added FINISHED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -761,7 +761,7 @@ namespace DarkMultiPlayerServer
 						command.Parameters.Add(new SQLiteParameter("@teamName", teamName));
 						command.Parameters.Add(new SQLiteParameter("@contractTitle", contractTitle));
 						int ret = command.ExecuteNonQuery();
-						DarkLog.Normal("DBManager: added contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
+						DarkLog.Normal("DBManager: added OFFERED contract to team: " + teamName + " with contractTitle: " + contractTitle + "rows changed: " + ret.ToString());
 					}
 					catch (SQLiteException e) {
 						DarkLog.Debug(e.Message);
@@ -885,7 +885,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any accepted contracts!");
 					return new List<string>();
 				}
 				return acceptedContracts;
@@ -914,7 +914,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any cancelled contracts!");
 					return new List<string>();
 				}
 				return cancelledContracts;
@@ -943,7 +943,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any completed contracts!");
 					return new List<string>();
 				}
 				return completedContracts;
@@ -972,7 +972,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any declined contracts!");
 					return new List<string>();
 				}
 				return declinedContracts;
@@ -1001,7 +1001,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any failed contracts!");
 					return new List<string>();
 				}
 				return failedContracts;
@@ -1030,7 +1030,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any finished contracts!");
 					return new List<string>();
 				}
 				return finishedContracts;
@@ -1059,7 +1059,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any research available!");
+					DarkLog.Debug("Team: " + teamName + " does not have any offered contracts!");
 					return new List<string>();
 				}
 				return offeredContracts;

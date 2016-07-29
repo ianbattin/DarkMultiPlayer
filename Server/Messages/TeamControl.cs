@@ -125,26 +125,23 @@ namespace DarkMultiPlayerServer.Messages
                             switch (Settings.settingsStore.gameMode)
                             {
                                 case GameMode.CAREER:
-                                    {
-                                        mw.Write<double>(team.funds);
-                                        mw.Write<float>(team.reputation);
-                                        mw.Write<float>(team.science);
-										mw.Write<string[]>(team.research.ToArray());
-										mw.Write<string[]>(team.purchased.ToArray());
+									DarkLog.Normal("Player " + client.playerName + " joined team " + client.teamName + ". Syncing funds: " + team.funds + " rep: " + team.reputation + " science: " + team.science);
+                                    mw.Write<double>(team.funds);
+                                    mw.Write<float>(team.reputation);
+                                    mw.Write<float>(team.science);
+									mw.Write<string[]>(team.research.ToArray());
+									mw.Write<string[]>(team.purchased.ToArray());
 
-										mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
-										mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
-									}
+									mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
+									mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
                                     break;
                                 case GameMode.SCIENCE:
-                                    {
-                                        mw.Write<float>(team.science);
-                                    }
+                                    mw.Write<float>(team.science);
                                     break;
                             }
                         } else
@@ -155,20 +152,6 @@ namespace DarkMultiPlayerServer.Messages
                     }
                     ClientHandler.SendToClient(client, tJoinResp, true);
                     sendTeamStatusJoin(client);
-
-					//I DONT BELIEVE THIS IS NECESSARY ANYMORE---------------------------------------------------------------
-                    ServerMessage tState = new ServerMessage();
-                    tState.type = ServerMessageType.RESEARCH_TECH_STATE;
-                    using (MessageWriter mw = new MessageWriter())
-                    {
-                        List<string> techIDs = DBManager.getTeamResearch(client.teamName);
-                        List<string> parts = DBManager.getTeamParts(client.teamName);
-                        DarkLog.Debug("HandleTeamJoinRequest: sending RESEARCH_TECH_STATE to: " + client.playerName + " with techIDs.Count: " + techIDs.Count + " and partNames: " + parts.Count);
-                        mw.Write<string[]>(techIDs.ToArray());
-                        mw.Write<string[]>(parts.ToArray());
-                        tState.data = mw.GetMessageBytes();
-                    }
-                    ClientHandler.SendToTeam(client, tState, true);
                 }
                 else
                 {

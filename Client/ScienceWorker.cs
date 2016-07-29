@@ -42,7 +42,9 @@ namespace DarkMultiPlayer
         public void onScienceReceived(float science, ScienceSubject subject, ProtoVessel vessel, bool something)
         {
             Debug.Log("onScienceReceived: received " + science.ToString() + " science with subject: " + subject.title);
-            if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
+			if (ContractWorker.fetch.syncingContracts || ResearchWorker.fetch.syncingResearch)
+				return;
+			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
                 return;
             using (MessageWriter mw = new MessageWriter())
             {
@@ -58,6 +60,8 @@ namespace DarkMultiPlayer
         /// <param name="reasons">The reason why the science was changed</param>
         public void onScienceChanged(float science, TransactionReasons reasons)
         {
+			if(ContractWorker.fetch.syncingContracts)
+				return;
             if (reasons == TransactionReasons.None)
                 return;
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
@@ -97,8 +101,8 @@ namespace DarkMultiPlayer
 			} catch(Exception e) {
 				if (e.InnerException is NullReferenceException) {
 					DarkLog.Debug("Science sync failed");
-					var scheduler = new Scheduler();
-					scheduler.Execute(() => syncScienceWithTeam(science), 5000);
+					//var scheduler = new Scheduler();
+					//scheduler.Execute(() => syncScienceWithTeam(science), 5000);
 				}
 			}
         }

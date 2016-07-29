@@ -10,6 +10,7 @@ namespace DarkMultiPlayer
     class ResearchWorker
     {
         public bool workerEnabled = false;
+		public bool syncingResearch = false;
         private static ResearchWorker singleton;
 
         public static ResearchWorker fetch
@@ -158,14 +159,14 @@ namespace DarkMultiPlayer
 				ProtoTechNode node = ResearchAndDevelopment.Instance.GetTechState(part.TechRequired);
 				if (!node.partsPurchased.Contains(part)) {
 					node.partsPurchased.Add(part);
-					Funding.Instance.AddFunds(-part.cost, TransactionReasons.None);
+					//Funding.Instance.AddFunds(-part.cost, TransactionReasons.None);
 					ResearchAndDevelopment.Instance.SetTechState(part.TechRequired, node);
 				}
 			} catch(Exception e) {
 				if(e.InnerException is NullReferenceException) {
 					DarkLog.Debug("Purchase part failed");
-					var scheduler = new Scheduler();
-					scheduler.Execute(() => purchasePart(partName), 5000);
+					//var scheduler = new Scheduler();
+					//scheduler.Execute(() => purchasePart(partName), 5000);
 				}
 			}
         }
@@ -182,25 +183,45 @@ namespace DarkMultiPlayer
 			} catch(Exception e) {
 				if(e.InnerException is NullReferenceException) {
 					DarkLog.Debug("Research tech failed");
-					var scheduler = new Scheduler();
-					scheduler.Execute(() => researchTech(techID), 5000);
+					//var scheduler = new Scheduler();
+					//scheduler.Execute(() => researchTech(techID), 5000);
 				}
 			}
 		}
 
 		public void syncResearchWithTeam(List<string> research) 
 		{
-			foreach(string techID in research) {
+			ResearchWorker.fetch.syncingResearch = true;
+			double funds = Funding.Instance.Funds;
+			float rep = Reputation.Instance.reputation;
+			float science = ResearchAndDevelopment.Instance.Science;
+
+			foreach (string techID in research) {
 				DarkLog.Debug("Syncing research with team with partID: " + techID);
 				researchTech(techID);
 			}
+
+			Funding.Instance.AddFunds(funds - Funding.Instance.Funds, TransactionReasons.None); //prevents being paid twice
+			Reputation.Instance.AddReputation(rep - Reputation.Instance.reputation, TransactionReasons.None);
+			ResearchAndDevelopment.Instance.AddScience(science - ResearchAndDevelopment.Instance.Science, TransactionReasons.None);
+			ResearchWorker.fetch.syncingResearch = true;
 		}
 
 		public void syncPurchasedWithTeam(List<string> purchased) {
+			ResearchWorker.fetch.syncingResearch = true;
+			double funds = Funding.Instance.Funds;
+			float rep = Reputation.Instance.reputation;
+			float science = ResearchAndDevelopment.Instance.Science;
+
 			foreach (string partName in purchased) {
 				DarkLog.Debug("Syncing purchased with team with partName: " + partName);
 				purchasePart(partName);
 			}
+
+			Funding.Instance.AddFunds(funds - Funding.Instance.Funds, TransactionReasons.None); //prevents being paid twice
+			Reputation.Instance.AddReputation(rep - Reputation.Instance.reputation, TransactionReasons.None);
+			ResearchAndDevelopment.Instance.AddScience(science - ResearchAndDevelopment.Instance.Science, TransactionReasons.None);
+			ResearchWorker.fetch.syncingResearch = true;
 		}
 
 		/// <summary>

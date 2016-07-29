@@ -94,8 +94,8 @@ namespace DarkMultiPlayer
 			} catch(Exception e) {
 				if(e.InnerException is NullReferenceException) {
 					DarkLog.Debug("Funds sync failed");
-					var scheduler = new Scheduler();
-					scheduler.Execute(() => syncFundsWithTeam(funds), 5000);
+					//var scheduler = new Scheduler();
+					//scheduler.Execute(() => syncFundsWithTeam(funds), 5000);
 				}
 			}
         }
@@ -105,14 +105,13 @@ namespace DarkMultiPlayer
 			try {
 				DarkLog.Debug("Syncing reputation with team to target reputation: " + rep.ToString());
 				float diff = rep - Reputation.Instance.reputation;
-				//Reputation.Instance.addReputation_discrete(diff, TransactionReasons.None);
 				Reputation.Instance.AddReputation(rep, TransactionReasons.None);
 				DarkLog.Debug("Reputation succesfully synced");
 			} catch(Exception e) {
 				if(e.InnerException is NullReferenceException) {
 					DarkLog.Debug("Rep sync failed");
-					var scheduler = new Scheduler();
-					scheduler.Execute(() => syncReputationWithTeam(rep), 5000);
+					//var scheduler = new Scheduler();
+					//scheduler.Execute(() => syncReputationWithTeam(rep), 5000);
 				}
 			}
 		}

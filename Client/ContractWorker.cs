@@ -9,6 +9,7 @@ using Contracts;
 namespace DarkMultiPlayer {
 	public class ContractWorker {
 		public bool workerEnabled = false;
+		public bool syncingContracts = false;
 		private Contract.State[] myContractStates = {
 			Contract.State.Active,
 			Contract.State.Cancelled,
@@ -30,6 +31,7 @@ namespace DarkMultiPlayer {
 		public static void Reset() {
 			if (singleton != null) {
 				singleton.workerEnabled = false;
+				singleton.syncingContracts = false;
 				GameEvents.Contract.onAccepted.Remove(singleton.onContractAccepted);
 				GameEvents.Contract.onCancelled.Remove(singleton.onContractCancelled);
 				GameEvents.Contract.onCompleted.Remove(singleton.onContractCompleted);
@@ -49,7 +51,9 @@ namespace DarkMultiPlayer {
 			GameEvents.Contract.onOffered.Add(singleton.onContractOffered);
 		}
 
-		private void onContractAccepted(Contract data) {
+		public void onContractAccepted(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -58,7 +62,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractCancelled(Contract data) {
+		public void onContractCancelled(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -67,7 +73,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractCompleted(Contract data) {
+		public void onContractCompleted(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -76,7 +84,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractDeclined(Contract data) {
+		public void onContractDeclined(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -85,7 +95,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractFailed(Contract data) {
+		public void onContractFailed(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -94,7 +106,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractFinished(Contract data) {
+		public void onContractFinished(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -103,7 +117,9 @@ namespace DarkMultiPlayer {
 			}
 		}
 
-		private void onContractOffered(Contract data) {
+		public void onContractOffered(Contract data) {
+			if (!ContractWorker.fetch.syncingContracts)
+				return;
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
@@ -119,9 +135,9 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for accepted contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[0].Add(contractTitle);
-
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -132,10 +148,10 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for cancelled contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[1].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -146,10 +162,10 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for completed contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[2].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -160,10 +176,10 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for declined contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[3].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -174,10 +190,10 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for failed contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[4].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -188,10 +204,10 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for finished contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[5].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[6].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
@@ -202,19 +218,26 @@ namespace DarkMultiPlayer {
 				DarkLog.Debug("Recieved message for offered contract: " + contractTitle);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
 				teamStatus.contracts[6].Add(contractTitle);
-
 				teamStatus.contracts[0].Remove(contractTitle);
 				teamStatus.contracts[1].Remove(contractTitle);
 				teamStatus.contracts[2].Remove(contractTitle);
 				teamStatus.contracts[3].Remove(contractTitle);
 				teamStatus.contracts[4].Remove(contractTitle);
 				teamStatus.contracts[5].Remove(contractTitle);
-				ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
+				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
+					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
 		public void syncContractsWithTeam(List<List<string>> contracts) {
 			DarkLog.Debug("syncing contracts with team");
+
+			double funds = Funding.Instance.Funds;
+			float rep = Reputation.Instance.reputation;
+			float science = ResearchAndDevelopment.Instance.Science;
+			ContractWorker.fetch.syncingContracts = true;
+			syncingContracts = true;
+
 			for (int i = 0; i < contracts.Count(); i++) {
 				foreach (string contractTitle in contracts[i]) {
 					try {
@@ -223,9 +246,6 @@ namespace DarkMultiPlayer {
 						DarkLog.Debug("switcing on contract type");
 						DarkLog.Debug("contract state = " + contract.ContractState);
 
-						double funds = Funding.Instance.Funds;
-						float rep = Reputation.Instance.reputation;
-						float science = ResearchAndDevelopment.Instance.Science;
 						switch (i) {
 							case 0:
 								DarkLog.Debug("Contracts: " + contractTitle + " accepted");
@@ -257,30 +277,36 @@ namespace DarkMultiPlayer {
 								break;
 							case 5:
 								DarkLog.Debug("Contracts: " + contractTitle + " finished");
-								if (contract.ContractState != Contract.State.DeadlineExpired) contract.IsFinished();
+								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Completed) contract.Complete();
 								break;
 							case 6:
 								DarkLog.Debug("Contracts: " + contractTitle + " offered");
+								if (contract.ContractState == Contract.State.Active) contract.Cancel();
 								if (contract.ContractState != Contract.State.Offered) contract.Offer();
 								break;
 							default:
 								DarkLog.Debug("CONTRACT SYNC FAILED");
 								break;
 						}
-						Funding.Instance.AddFunds(funds - Funding.Instance.Funds, TransactionReasons.None); //prevents being paid twice
-						Reputation.Instance.AddReputation(rep - Reputation.Instance.reputation, TransactionReasons.None);
-						ResearchAndDevelopment.Instance.AddScience(science - ResearchAndDevelopment.Instance.Science, TransactionReasons.None);
-						/*
-						//Make sure team is synced from database
-						CareerWorker.fetch.syncFundsWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).funds);
-						CareerWorker.fetch.syncReputationWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).reputation);
-						ScienceWorker.fetch.syncScienceWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).science);
-						*/
-						} catch (Exception e) {
-							DarkLog.Debug("SYNCING CONTRACTS OF TYPE: " + i + " WITH TEAM FAILED");
+					} catch (Exception e) {
+						DarkLog.Debug("SYNCING CONTRACTS OF TYPE: " + i + " WITH TEAM FAILED");
 					}
 				}
 			}
+
+			Funding.Instance.AddFunds(funds - Funding.Instance.Funds, TransactionReasons.None); //prevents being paid twice
+			Reputation.Instance.AddReputation(rep - Reputation.Instance.reputation, TransactionReasons.None);
+			ResearchAndDevelopment.Instance.AddScience(science - ResearchAndDevelopment.Instance.Science, TransactionReasons.None);
+			ContractWorker.fetch.syncingContracts = false;
+			syncingContracts = false;
+			/*
+			//Make sure team is synced from database
+			CareerWorker.fetch.syncFundsWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).funds);
+			CareerWorker.fetch.syncReputationWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).reputation);
+			ScienceWorker.fetch.syncScienceWithTeam(TeamWorker.fetch.teams.Find(teamName => teamName.teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName).science);
+			*/
 		}
 
 		public void SendInitialContractState() {

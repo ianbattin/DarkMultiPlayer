@@ -227,7 +227,7 @@ namespace DarkMultiPlayer
 					}
 					ContractWorker.fetch.syncContractsWithTeam(contracts);
 
-					DarkLog.Debug("Joinging Team - Funds: " + funds + " | Rep: " + reputation + " | Science: " + science);
+					DarkLog.Debug("Joining Team - Funds: " + funds + " | Rep: " + reputation + " | Science: " + science);
 					string researchString = "";
 					for(int i = 0; i < research.Count; i++) {
 						researchString += research[i] + ", ";
@@ -245,22 +245,6 @@ namespace DarkMultiPlayer
 					DarkLog.Debug("trying to sync science");
 					ScienceWorker.fetch.syncScienceWithTeam(science);
 				}
-
-				/*
-				//THIS WAS COMMENTED OUT - CRASHES THE GAME
-				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER) {
-					DarkLog.Debug("trying to sync research");
-					List<RDNodeStatus> RDStatus = new List<RDNodeStatus>();
-					int numRD = mr.Read<int>();
-					DarkLog.Debug("" + numRD);
-					for (int i = 0; i < numRD; i++) {
-						string techID = mr.Read<string>();
-						bool researched = mr.Read<bool>();
-						RDStatus.Add(new RDNodeStatus(techID, researched));
-						DarkLog.Debug("" + techID + " | " + researched);
-						// ResearchWorker set nodes accordingly
-					}
-				}*/
 			}
         }
 
