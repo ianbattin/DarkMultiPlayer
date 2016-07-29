@@ -32,6 +32,8 @@ namespace DarkMultiPlayer
 
 		public void onFundsChanged(double funds, TransactionReasons reasons)
         {
+			if(ContractWorker.fetch.syncingContracts || ResearchWorker.fetch.syncingResearch)
+				return;
             if (reasons == TransactionReasons.None)
                 return;
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
@@ -46,6 +48,8 @@ namespace DarkMultiPlayer
 
         public void onReputationChanged(float reputation, TransactionReasons reasons)
         {
+			if (ContractWorker.fetch.syncingContracts || ResearchWorker.fetch.syncingResearch)
+				return;
             if (reasons == TransactionReasons.None)
                 return;
             if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
