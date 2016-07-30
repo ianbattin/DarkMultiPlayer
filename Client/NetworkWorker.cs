@@ -159,6 +159,10 @@ namespace DarkMultiPlayer {
                 WarpWorker.fetch.workerEnabled = true;
                 CraftLibraryWorker.fetch.workerEnabled = true;
                 ScreenshotWorker.fetch.workerEnabled = true;
+				CareerWorker.fetch.workerEnabled = true;
+				ScienceWorker.fetch.workerEnabled = true;
+				ResearchWorker.fetch.workerEnabled = true;
+				ContractWorker.fetch.workerEnabled = true;
                 SendMotdRequest();
                 ToolbarSupport.fetch.EnableToolbar();
             }

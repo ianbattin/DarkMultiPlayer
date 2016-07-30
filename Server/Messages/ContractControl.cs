@@ -12,7 +12,7 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "accepted");
+				if (!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "accepted");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_ACCEPTED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -29,7 +29,7 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "cancelled");
+				if (!DBManager.getTeamCancelledContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "cancelled");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_CANCELLED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -46,7 +46,7 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "completed");
+				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "completed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_COMPLETED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -63,7 +63,7 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "declined");
+				if (!DBManager.getTeamDeclinedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "declined");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_DECLINED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -80,7 +80,7 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "failed");
+				if (!DBManager.getTeamFailedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "failed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_FAILED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -92,12 +92,13 @@ namespace DarkMultiPlayerServer.Messages {
 			}
 		}
 
+		//Make it same as completed so the game doesnt break
 		public static void handleContractFinishedMessage(ClientObject client, byte[] messageData) {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "finished");
+				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "completed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_FINISHED;
 				using (MessageWriter mw = new MessageWriter()) {
@@ -114,7 +115,8 @@ namespace DarkMultiPlayerServer.Messages {
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string contractTitle = mr.Read<string>();
-				DBManager.updateTeamContracts(client.teamName, contractTitle, "offered");
+				if(!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contractTitle) && !DBManager.getTeamOfferedContracts(client.teamName).Contains(contractTitle))
+					DBManager.updateTeamContracts(client.teamName, contractTitle, "offered");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_OFFERED;
 				using (MessageWriter mw = new MessageWriter()) {

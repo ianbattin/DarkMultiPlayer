@@ -244,47 +244,48 @@ namespace DarkMultiPlayer {
 					try {
 						DarkLog.Debug("Syncing contract: " + contractTitle + " type: " + i + " | num contracts in type: " + contracts[i].Count());
 						Contract contract = ContractSystem.Instance.Contracts.Find(someContract => someContract.Title == contractTitle);
+						if(contract == null) contract = ContractSystem.Instance.ContractsFinished.Find(someContract => someContract.Title == contractTitle);
 						DarkLog.Debug("switcing on contract type");
 						DarkLog.Debug("contract state = " + contract.ContractState);
 
 						switch (i) {
 							case 0:
 								DarkLog.Debug("Contracts: " + contractTitle + " accepted");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active) contract.Offer();
 								if (contract.ContractState != Contract.State.Active) contract.Accept();
 								break;
 							case 1:
 								DarkLog.Debug("Contracts: " + contractTitle + " cancelled");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
-								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Cancelled) contract.Offer();
+								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Cancelled) contract.Accept();
 								if (contract.ContractState != Contract.State.Cancelled) contract.Cancel();
 								break;
 							case 2:
 								DarkLog.Debug("Contracts: " + contractTitle + " completed");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
-								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Offer();
+								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Accept();
 								if (contract.ContractState != Contract.State.Completed) contract.Complete();
 								break;
 							case 3:
 								DarkLog.Debug("Contracts: " + contractTitle + " declined");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Declined) contract.Offer();
 								if (contract.ContractState != Contract.State.Declined) contract.Decline();
 								break;
 							case 4:
 								DarkLog.Debug("Contracts: " + contractTitle + " failed");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
-								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Failed) contract.Offer();
+								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Failed) contract.Accept();
 								if (contract.ContractState != Contract.State.Failed) contract.Fail();
 								break;
 							case 5:
 								DarkLog.Debug("Contracts: " + contractTitle + " finished");
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
-								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Offer();
+								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Accept();
 								if (contract.ContractState != Contract.State.Completed) contract.Complete();
 								break;
 							case 6:
 								DarkLog.Debug("Contracts: " + contractTitle + " offered");
-								if (contract.ContractState == Contract.State.Active) contract.Cancel();
+								if (contract.ContractState == Contract.State.Active && contract.ContractState != Contract.State.Offered) contract.Cancel();
 								if (contract.ContractState != Contract.State.Offered) contract.Offer();
 								break;
 							default:
@@ -292,6 +293,7 @@ namespace DarkMultiPlayer {
 								break;
 						}
 					} catch (Exception e) {
+						DarkLog.Debug(e.Message);
 						DarkLog.Debug("SYNCING CONTRACTS OF TYPE: " + i + " WITH TEAM FAILED");
 					}
 				}

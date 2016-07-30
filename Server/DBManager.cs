@@ -862,12 +862,12 @@ namespace DarkMultiPlayerServer
 				return contracts;
 			}
 			catch (SQLiteException e) {
-				DarkLog.Debug("getTeamResearch: " + e.Message);
+				DarkLog.Debug("getTeamContracts: " + e.Message);
 				return new List<List<string>>(); ;
 			}
 		}
 
-		private static List<string> getTeamAcceptedContracts(string teamName) {
+		public static List<string> getTeamAcceptedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -885,7 +885,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any accepted contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any accepted contracts!");
 					return new List<string>();
 				}
 				return acceptedContracts;
@@ -896,7 +896,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamCancelledContracts(string teamName) {
+		public static List<string> getTeamCancelledContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -914,7 +914,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any cancelled contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any cancelled contracts!");
 					return new List<string>();
 				}
 				return cancelledContracts;
@@ -925,7 +925,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamCompletedContracts(string teamName) {
+		public static List<string> getTeamCompletedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -943,7 +943,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any completed contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any completed contracts!");
 					return new List<string>();
 				}
 				return completedContracts;
@@ -954,7 +954,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamDeclinedContracts(string teamName) {
+		public static List<string> getTeamDeclinedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -972,7 +972,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any declined contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any declined contracts!");
 					return new List<string>();
 				}
 				return declinedContracts;
@@ -983,7 +983,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamFailedContracts(string teamName) {
+		public static List<string> getTeamFailedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -1001,7 +1001,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any failed contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any failed contracts!");
 					return new List<string>();
 				}
 				return failedContracts;
@@ -1012,7 +1012,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamFinishedContracts(string teamName) {
+		public static List<string> getTeamFinishedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -1030,7 +1030,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any finished contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any finished contracts!");
 					return new List<string>();
 				}
 				return finishedContracts;
@@ -1041,7 +1041,7 @@ namespace DarkMultiPlayerServer
 			}
 		}
 
-		private static List<string> getTeamOfferedContracts(string teamName) {
+		public static List<string> getTeamOfferedContracts(string teamName) {
 			try {
 				int teamID = DBManager.getTeamIdByTeamName(teamName);
 				if (teamID < 0) {
@@ -1059,7 +1059,7 @@ namespace DarkMultiPlayerServer
 					}
 				}
 				else {
-					DarkLog.Debug("Team: " + teamName + " does not have any offered contracts!");
+					//DarkLog.Debug("Team: " + teamName + " does not have any offered contracts!");
 					return new List<string>();
 				}
 				return offeredContracts;
