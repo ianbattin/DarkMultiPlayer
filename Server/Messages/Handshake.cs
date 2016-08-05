@@ -253,7 +253,7 @@ namespace DarkMultiPlayerServer.Messages
 						mw.Write<string[]>(team.purchased.ToArray());
 
 						for(int i = 0; i < 7; i++) {
-							mw.Write<string[]>(team.contracts.ElementAt(i).ToArray());
+							mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(i)).ToArray());
 							//DarkLog.Normal("element at " + i + " is " + team.contracts.ElementAt(i).ToString());
 						}
 					}

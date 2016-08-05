@@ -9,6 +9,7 @@ using UnityEngine;
 using DarkMultiPlayerCommon;
 using MessageStream2;
 using System.Linq;
+using Contracts;
 
 namespace DarkMultiPlayer {
 	public class NetworkWorker
@@ -981,9 +982,9 @@ namespace DarkMultiPlayer {
 							List<string> purchased = mr.Read<string[]>().ToList();
 
 							//Getting all contract types
-							List<List<string>> contracts = new List<List<string>>();
+							List<List<Contract>> contracts = new List<List<Contract>>();
 							for (int i = 0; i < 7; i++) {
-								contracts.Add(mr.Read<string[]>().ToList());
+								contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 								DarkLog.Debug("element at " + i + " is " + contracts.ElementAt(i).ToString());
 							}
 

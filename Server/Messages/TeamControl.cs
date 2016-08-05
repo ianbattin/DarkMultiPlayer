@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DarkMultiPlayerCommon;
+using Contracts;
 
 namespace DarkMultiPlayerServer.Messages
 {
@@ -28,7 +29,7 @@ namespace DarkMultiPlayerServer.Messages
                 float science = 0f;
 				List<string> research = new List<string>();
 				List<string> purchased = new List<string>();
-				List<List<string>> contracts = new List<List<string>>();
+				List<List<Contract>> contracts = new List<List<Contract>>();
                 switch (Settings.settingsStore.gameMode)
                 {
                     case GameMode.CAREER:
@@ -41,7 +42,7 @@ namespace DarkMultiPlayerServer.Messages
 
 							//Getting all contract types
 							for(int i = 0; i < 7; i++) {
-								contracts.Add(mr.Read<string[]>().ToList());
+								contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 							}
                         }
                         break;
@@ -73,13 +74,13 @@ namespace DarkMultiPlayerServer.Messages
 						mw.Write<string[]>(team.research.ToArray());
 						mw.Write<string[]>(team.purchased.ToArray());
 
-						mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
-						mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(0)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(1)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(2)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(3)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(4)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(5)).ToArray());
+						mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(6)).ToArray());
 
 						mw.Write<int>(team.teamMembers.Count);
                         DarkLog.Debug("handleTeamCreateRequest: sending " + team.teamMembers.Count + " teamMembers");
@@ -132,14 +133,14 @@ namespace DarkMultiPlayerServer.Messages
 									mw.Write<string[]>(team.research.ToArray());
 									mw.Write<string[]>(team.purchased.ToArray());
 
-									mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
-									mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
-                                    break;
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(0)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(1)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(2)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(3)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(4)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(5)).ToArray());
+									mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(6)).ToArray());
+									break;
                                 case GameMode.SCIENCE:
                                     mw.Write<float>(team.science);
                                     break;
@@ -228,13 +229,13 @@ namespace DarkMultiPlayerServer.Messages
 				mw.Write<string[]>(team.research.ToArray());
 				mw.Write<string[]>(team.purchased.ToArray());
 
-				mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
-				mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(0)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(1)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(2)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(3)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(4)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(5)).ToArray());
+				mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(6)).ToArray());
 
 				// serialize member list
 				mw.Write<int>(team.teamMembers.Count);
@@ -269,13 +270,13 @@ namespace DarkMultiPlayerServer.Messages
 					mw.Write<string[]>(team.research.ToArray());
 					mw.Write<string[]>(team.purchased.ToArray());
 
-					mw.Write<string[]>(team.contracts.ElementAt(0).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(1).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(2).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(3).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(4).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(5).ToArray());
-					mw.Write<string[]>(team.contracts.ElementAt(6).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(0)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(1)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(2)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(3)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(4)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(5)).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(team.contracts.ElementAt(6)).ToArray());
 
 					mw.Write<int>(team.teamMembers.Count);
                     foreach(MemberStatus member in team.teamMembers)

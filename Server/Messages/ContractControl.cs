@@ -11,13 +11,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "accepted");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "accepted");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_ACCEPTED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -28,13 +28,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamCancelledContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "cancelled");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamCancelledContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "cancelled");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_CANCELLED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -45,13 +45,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "completed");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "completed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_COMPLETED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -62,13 +62,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamDeclinedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "declined");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamDeclinedContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "declined");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_DECLINED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -79,13 +79,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamFailedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "failed");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamFailedContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "failed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_FAILED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -97,13 +97,13 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contractTitle)) DBManager.updateTeamContracts(client.teamName, contractTitle, "completed");
+				string contract = mr.Read<string>();
+				if (!DBManager.getTeamCompletedContracts(client.teamName).Contains(contract)) DBManager.updateTeamContracts(client.teamName, contract, "completed");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_FINISHED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);
@@ -114,14 +114,14 @@ namespace DarkMultiPlayerServer.Messages {
 			if (client.teamName == "")
 				return;
 			using (MessageReader mr = new MessageReader(messageData)) {
-				string contractTitle = mr.Read<string>();
-				if(!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contractTitle) && !DBManager.getTeamOfferedContracts(client.teamName).Contains(contractTitle))
-					DBManager.updateTeamContracts(client.teamName, contractTitle, "offered");
+				string contract = mr.Read<string>();
+				if(!DBManager.getTeamAcceptedContracts(client.teamName).Contains(contract) && !DBManager.getTeamOfferedContracts(client.teamName).Contains(contract))
+					DBManager.updateTeamContracts(client.teamName, contract, "offered");
 				ServerMessage message = new ServerMessage();
 				message.type = ServerMessageType.CONTRACT_OFFERED;
 				using (MessageWriter mw = new MessageWriter()) {
 					mw.Write<string>(client.teamName);
-					mw.Write<string>(contractTitle);
+					mw.Write<string>(contract);
 					message.data = mw.GetMessageBytes();
 				}
 				ClientHandler.SendToAll(client, message, true);

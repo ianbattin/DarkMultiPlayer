@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using DarkMultiPlayerCommon;
 using UnityEngine;
+using Contracts;
 
 namespace DarkMultiPlayer
 {
@@ -65,13 +66,13 @@ namespace DarkMultiPlayer
 					mw.Write<string[]>(ResearchWorker.fetch.getAvailableTechIDs().ToArray());
 					mw.Write<string[]>(ResearchWorker.fetch.getPurchasedParts().ToArray());
 					DarkLog.Debug("About to get contracts...");
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("accepted").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("cancelled").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("completed").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("declined").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("failed").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("finished").ToArray());
-					mw.Write<string[]>(ContractWorker.fetch.getContractsOfType("offered").ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("accepted")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("cancelled")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("completed")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("declined")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("failed")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("finished")).ToArray());
+					mw.Write<string[]>(Common.serializeArrayContracts(ContractWorker.fetch.getContractsOfType("offered")).ToArray());
 					DarkLog.Debug("Got contracts");
 					//mw.Write<RDNodeStatus>
 				} else if(HighLogic.CurrentGame.Mode == Game.Modes.SCIENCE_SANDBOX) {
@@ -140,9 +141,9 @@ namespace DarkMultiPlayer
 				team.purchased = new List<string>(mr.Read<string[]>());
 
 				//Getting all contract types
-				team.contracts = new List<List<string>>();
+				team.contracts = new List<List<Contract>>();
 				for (int i = 0; i < 7; i++) {
-					team.contracts.Add(mr.Read<string[]>().ToList());
+					team.contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 				}
 
 				int memberCount = mr.Read<int>();
@@ -162,9 +163,9 @@ namespace DarkMultiPlayer
 				}
 				DarkLog.Debug("Team Purchased: " + purchasedString);
 				string contractsString = "";
-				foreach (List<string> list in team.contracts) {
-					foreach(string s in list) {
-						contractsString += (s + ", ");
+				foreach (List<Contract> list in team.contracts) {
+					foreach(Contract c in list) {
+						contractsString += (c.Title + ", ");
 					}
 				}
 				DarkLog.Debug("Team Contracts: " + contractsString);
@@ -221,9 +222,9 @@ namespace DarkMultiPlayer
 					ResearchWorker.fetch.syncPurchasedWithTeam(purchased);
 
 					//Getting all contract types from teamstatus from databsse
-					List<List<string>> contracts = new List<List<string>>();
+					List<List<Contract>> contracts = new List<List<Contract>>();
 					for (int i = 0; i < 7; i++) {
-						contracts.Add(mr.Read<string[]>().ToList());
+						contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 					}
 					ContractWorker.fetch.syncContractsWithTeam(contracts);
 
@@ -308,9 +309,9 @@ namespace DarkMultiPlayer
 							team.purchased = new List<string>(mr.Read<string[]>());
 
 							//Getting all contract types
-							team.contracts = new List<List<string>>();
+							team.contracts = new List<List<Contract>>();
 							for (int i = 0; i < 7; i++) {
-								team.contracts.Add(mr.Read<string[]>().ToList());
+								team.contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 							}
 
 							int memberCount = mr.Read<int>();
@@ -344,9 +345,9 @@ namespace DarkMultiPlayer
 									team.purchased = new List<string>(mr.Read<string[]>());
 
 									//Getting all contract types
-									team.contracts = new List<List<string>>();
+									team.contracts = new List<List<Contract>>();
 									for (int j = 0; j < 7; j++) {
-										team.contracts.Add(mr.Read<string[]>().ToList());
+										team.contracts.Add(Common.deserializeArrayContracts(mr.Read<string[]>().ToList()));
 									}
 
 									int memberCount = mr.Read<int>();

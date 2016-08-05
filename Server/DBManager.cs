@@ -5,6 +5,8 @@ using System.Text;
 using System.Data.SQLite;
 using System.IO;
 using DarkMultiPlayerCommon;
+using Contracts;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DarkMultiPlayerServer
 {
@@ -72,7 +74,7 @@ namespace DarkMultiPlayerServer
         /// <param name="creator"></param>
         /// <param name="creator_pubKey"></param>
         /// <returns></returns>
-        public static TeamStatus createNewTeam(string name, string password, double funds, float reputation, float science, List<string> research, List<string> purchased, List<List<string>> contracts, string creator, string creator_pubKey)
+        public static TeamStatus createNewTeam(string name, string password, double funds, float reputation, float science, List<string> research, List<string> purchased, List<List<Contract>> contracts, string creator, string creator_pubKey)
         {
             try {
                 string sql = "BEGIN;";
@@ -106,7 +108,8 @@ namespace DarkMultiPlayerServer
 				team.research = research;
 				team.purchased = purchased;
 				team.contracts = contracts;
-                team.teamMembers = new List<MemberStatus>();
+
+				team.teamMembers = new List<MemberStatus>();
                 MemberStatus member = new MemberStatus();
                 member.memberName = creator;
                 member.online = true;
@@ -251,12 +254,12 @@ namespace DarkMultiPlayerServer
             return teamList;
         }
 
-        /// <summary>
-        /// internal helper function to get the status of a team
-        /// </summary>
-        /// <param name="reader">Requires the following fields from team: id,name,funds,reputation,science</param>
-        /// <returns></returns>
-        private static TeamStatus parseTeamStatus(SQLiteDataReader reader)
+		/// <summary>
+		/// internal helper function to get the status of a team
+		/// </summary>
+		/// <param name="reader">Requires the following fields from team: id,name,funds,reputation,science</param>
+		/// <returns></returns>
+		private static TeamStatus parseTeamStatus(SQLiteDataReader reader)
         {
             TeamStatus team = new TeamStatus();
             team.teamID = reader.GetInt32(0);
@@ -266,7 +269,15 @@ namespace DarkMultiPlayerServer
 			team.science = reader.GetFloat(4);
 			team.research = getTeamResearch(team.teamName);
 			team.purchased = getTeamParts(team.teamName);
-			team.contracts = getTeamContracts(team.teamName);
+		
+			List<List<string>> rawTeamContractData = getTeamContracts(team.teamName);
+			List<List<Contract>> contracts = new List<List<Contract>>();
+			for(int i = 0; i < rawTeamContractData.Count(); i++) {
+				foreach(string rawData in rawTeamContractData[i]) {
+					contracts[i].Add(Common.deserializedContract(rawData));
+				}
+			}
+			team.contracts = contracts;
 
             string sql = "SELECT name FROM team_members where id = @id";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);

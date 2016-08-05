@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Contracts;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace DarkMultiPlayer {
 	public class ContractWorker {
@@ -58,7 +60,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractAcceptedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -69,7 +71,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractCancelledMessage(mw.GetMessageBytes());
 			}
 		}
@@ -80,7 +82,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractCompletedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -91,7 +93,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractDeclinedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -102,7 +104,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractFailedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -113,7 +115,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractFinishedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -124,7 +126,7 @@ namespace DarkMultiPlayer {
 			if (PlayerStatusWorker.fetch.myPlayerStatus.teamName == "")
 				return;
 			using (MessageWriter mw = new MessageWriter()) {
-				mw.Write<string>(data.Title);
+				mw.Write<string>(Common.serializedContract(data));
 				NetworkWorker.fetch.SendContractOfferedMessage(mw.GetMessageBytes());
 			}
 		}
@@ -132,11 +134,11 @@ namespace DarkMultiPlayer {
 		public void handleContractAcceptedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for accepted contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for accepted contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[0].Add(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[0].Add(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -145,12 +147,12 @@ namespace DarkMultiPlayer {
 		public void handleContractCancelledMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for cancelled contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for cancelled contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[1].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[1].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -159,12 +161,12 @@ namespace DarkMultiPlayer {
 		public void handleContractCompletedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for completed contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for completed contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[2].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[2].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -173,12 +175,12 @@ namespace DarkMultiPlayer {
 		public void handleContractDeclinedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for declined contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for declined contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[3].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[3].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -187,12 +189,12 @@ namespace DarkMultiPlayer {
 		public void handleContractFailedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for failed contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for failed contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[4].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[4].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -201,12 +203,12 @@ namespace DarkMultiPlayer {
 		public void handleContractFinishedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for finished contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for finished contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[5].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[6].Remove(contractTitle);
+				teamStatus.contracts[5].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[6].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
@@ -215,22 +217,22 @@ namespace DarkMultiPlayer {
 		public void handleContractOfferedMessage(byte[] messageData) {
 			using (MessageReader mr = new MessageReader(messageData)) {
 				string teamName = mr.Read<string>();
-				string contractTitle = mr.Read<string>();
-				DarkLog.Debug("Recieved message for offered contract: " + contractTitle);
+				Contract contract = Common.deserializedContract(mr.Read<string>());
+				DarkLog.Debug("Recieved message for offered contract: " + contract.Title);
 				TeamStatus teamStatus = TeamWorker.fetch.teams.Find(team => team.teamName == teamName);
-				teamStatus.contracts[6].Add(contractTitle);
-				teamStatus.contracts[0].Remove(contractTitle);
-				teamStatus.contracts[1].Remove(contractTitle);
-				teamStatus.contracts[2].Remove(contractTitle);
-				teamStatus.contracts[3].Remove(contractTitle);
-				teamStatus.contracts[4].Remove(contractTitle);
-				teamStatus.contracts[5].Remove(contractTitle);
+				teamStatus.contracts[6].Add(contract);
+				teamStatus.contracts[0].Remove(contract);
+				teamStatus.contracts[1].Remove(contract);
+				teamStatus.contracts[2].Remove(contract);
+				teamStatus.contracts[3].Remove(contract);
+				teamStatus.contracts[4].Remove(contract);
+				teamStatus.contracts[5].Remove(contract);
 				if (teamName == PlayerStatusWorker.fetch.myPlayerStatus.teamName)
 					ContractWorker.fetch.syncContractsWithTeam(teamStatus.contracts);
 			}
 		}
 
-		public void syncContractsWithTeam(List<List<string>> contracts) {
+		public void syncContractsWithTeam(List<List<Contract>> contracts) {
 			DarkLog.Debug("syncing contracts with team");
 
 			double funds = Funding.Instance.Funds;
@@ -240,53 +242,53 @@ namespace DarkMultiPlayer {
 			syncingContracts = true;
 
 			for (int i = 0; i < contracts.Count(); i++) {
-				foreach (string contractTitle in contracts[i]) {
+				foreach (Contract contract in contracts[i]) {
 					try {
-						DarkLog.Debug("Syncing contract: " + contractTitle + " type: " + i + " | num contracts in type: " + contracts[i].Count());
-						Contract contract = ContractSystem.Instance.Contracts.Find(someContract => someContract.Title == contractTitle);
-						if(contract == null) contract = ContractSystem.Instance.ContractsFinished.Find(someContract => someContract.Title == contractTitle);
-						DarkLog.Debug("switcing on contract type");
-						DarkLog.Debug("contract state = " + contract.ContractState);
+						DarkLog.Debug("Syncing contract: " + contract.Title + " type: " + i + " | num contracts in type: " + contracts[i].Count());
+						Contract generatedContract = ContractSystem.Instance.GenerateContract(contract.MissionSeed, contract.Prestige, null);
+
+						DarkLog.Debug("switcing on generatedContract type");
+						DarkLog.Debug("generatedContract state = " + generatedContract.ContractState);
 
 						switch (i) {
 							case 0:
-								DarkLog.Debug("Contracts: " + contractTitle + " accepted");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active) contract.Offer();
-								if (contract.ContractState != Contract.State.Active) contract.Accept();
+								DarkLog.Debug("Contracts: " + contract.Title + " accepted");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Active) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Active) generatedContract.Accept();
 								break;
 							case 1:
-								DarkLog.Debug("Contracts: " + contractTitle + " cancelled");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Cancelled) contract.Offer();
-								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Cancelled) contract.Accept();
-								if (contract.ContractState != Contract.State.Cancelled) contract.Cancel();
+								DarkLog.Debug("Contracts: " + contract.Title + " cancelled");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Cancelled) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Cancelled) generatedContract.Accept();
+								if (generatedContract.ContractState != Contract.State.Cancelled) generatedContract.Cancel();
 								break;
 							case 2:
-								DarkLog.Debug("Contracts: " + contractTitle + " completed");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Offer();
-								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Accept();
-								if (contract.ContractState != Contract.State.Completed) contract.Complete();
+								DarkLog.Debug("Contracts: " + contract.Title + " completed");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Completed) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Completed) generatedContract.Accept();
+								if (generatedContract.ContractState != Contract.State.Completed) generatedContract.Complete();
 								break;
 							case 3:
-								DarkLog.Debug("Contracts: " + contractTitle + " declined");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Declined) contract.Offer();
-								if (contract.ContractState != Contract.State.Declined) contract.Decline();
+								DarkLog.Debug("Contracts: " + contract.Title + " declined");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Declined) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Declined) generatedContract.Decline();
 								break;
 							case 4:
-								DarkLog.Debug("Contracts: " + contractTitle + " failed");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Failed) contract.Offer();
-								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Failed) contract.Accept();
-								if (contract.ContractState != Contract.State.Failed) contract.Fail();
+								DarkLog.Debug("Contracts: " + contract.Title + " failed");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Failed) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Failed) generatedContract.Accept();
+								if (generatedContract.ContractState != Contract.State.Failed) generatedContract.Fail();
 								break;
 							case 5:
-								DarkLog.Debug("Contracts: " + contractTitle + " finished");
-								if (contract.ContractState != Contract.State.Offered && contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Offer();
-								if (contract.ContractState != Contract.State.Active && contract.ContractState != Contract.State.Completed) contract.Accept();
-								if (contract.ContractState != Contract.State.Completed) contract.Complete();
+								DarkLog.Debug("Contracts: " + contract.Title + " finished");
+								if (generatedContract.ContractState != Contract.State.Offered && generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Completed) generatedContract.Offer();
+								if (generatedContract.ContractState != Contract.State.Active && generatedContract.ContractState != Contract.State.Completed) generatedContract.Accept();
+								if (generatedContract.ContractState != Contract.State.Completed) generatedContract.Complete();
 								break;
 							case 6:
-								DarkLog.Debug("Contracts: " + contractTitle + " offered");
-								if (contract.ContractState == Contract.State.Active && contract.ContractState != Contract.State.Offered) contract.Cancel();
-								if (contract.ContractState != Contract.State.Offered) contract.Offer();
+								DarkLog.Debug("Contracts: " + contract.Title + " offered");
+								if (generatedContract.ContractState == Contract.State.Active && generatedContract.ContractState != Contract.State.Offered) generatedContract.Cancel();
+								if (generatedContract.ContractState != Contract.State.Offered) generatedContract.Offer();
 								break;
 							default:
 								DarkLog.Debug("CONTRACT SYNC FAILED");
@@ -314,15 +316,19 @@ namespace DarkMultiPlayer {
 
 		public void SendInitialContractState() {
 			using (MessageWriter mw = new MessageWriter()) {
-				foreach(List<string> contractList in getContractState()) {
-					mw.Write<string[]>(contractList.ToArray());
+				foreach(List<Contract> contractList in getContractState()) {
+					List<string> rawData = new List<string>();
+					foreach(Contract contract in contractList) {
+						rawData.Add(Common.serializedContract(contract));
+					}
+					mw.Write<string[]>(rawData.ToArray());
 				}
 				NetworkWorker.fetch.SendContractState(mw.GetMessageBytes());
 			}
 		}
 
-		public List<List<string>> getContractState() {
-			List<List<string>> contracts = new List<List<string>>();
+		public List<List<Contract>> getContractState() {
+			List<List<Contract>> contracts = new List<List<Contract>>();
 			contracts.Add(getContractsOfType("ACCEPTED"));
 			contracts.Add(getContractsOfType("CANCELLED"));
 			contracts.Add(getContractsOfType("COMPLETED"));
@@ -333,61 +339,61 @@ namespace DarkMultiPlayer {
 			return contracts;
 		}
 
-		public List<string> getContractsOfType(string type) {
+		public List<Contract> getContractsOfType(string type) {
 			DarkLog.Debug("Getting contracts of type: " + type);
-			List<string> contractNames = new List<string>();
+			List<Contract> contracts = new List<Contract>();
 			switch(type.ToUpper()) {
 				case "ACCEPTED":
 					List<Contract> acceptedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Active);
 					foreach(Contract contract in acceptedContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "CANCELLED":
 					List<Contract> cancelledContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Cancelled);
 					foreach (Contract contract in cancelledContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "COMPLETED":
 					List<Contract> completedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Completed);
 					foreach (Contract contract in completedContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "DECLINED":
 					List<Contract> declinedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Declined);
 					foreach (Contract contract in declinedContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "FAILED":
 					List<Contract> failedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Failed);
 					foreach (Contract contract in failedContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "FINISHED":
 					List<Contract> finishedContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.OfferExpired);
 					foreach (Contract contract in finishedContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				case "OFFERED":
 					List<Contract> offeredContracts = ContractSystem.Instance.Contracts.FindAll(contract => contract.ContractState == Contract.State.Offered);
 					foreach (Contract contract in offeredContracts) {
-						contractNames.Add(contract.Title);
+						contracts.Add(contract);
 					}
 					break;
 				default:
 					DarkLog.Debug("Something went wrong with getting contracts");
 					return null;
 			}
-			foreach(string contractName in contractNames) {
-				DarkLog.Debug("Got contract of type: " + type + " named: " + contractName);
+			foreach(Contract contract in contracts) {
+				DarkLog.Debug("Got contract of type: " + type + " named: " + contract.Title);
 			}
 
-			return contractNames;
+			return contracts;
 		}
 	}
 }
